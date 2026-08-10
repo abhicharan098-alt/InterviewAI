@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                @id @default(uuid())
+  name                 String?
+  email                String                @unique
+  /// bcrypt hash for Email + Password sign-in. NULL for Google-only accounts.
+  passwordHash         String?
+  image                String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  achievements         Achievement[]
+  accounts             Account[]
+  interviews           Interview[]
+  practiceAttempts     PracticeAttempt[]
+  profile              Profile?
+  progresses           Progress[]
+  recommendations      Recommendation[]
+  resumes              Resume[]
+  settings             UserSettings?
+  notifications        Notification[]
+  notificationSettings NotificationSettings?
+  streak               UserStreak?
+  dailyActivities      DailyActivity[]
+}
+
+/// Provider accounts link an external identity provider (e.g. Google) to a User.
+/// OAuth tokens are intentionally NOT persisted here (we use JWT sessions).
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  type              String   @default("oauth")
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Profile {
+  id                     String           @id @default(uuid())
+  userId                 String           @unique
+  phone                  String?
+  bio                    String?
+  targetRole             String?
+  experienceLevel        ExperienceLevel?
+  location               String?
+  skills                 Json?
+  education              Json?
+  focusAreas             String[]         @default([])
+  coachAnalysis          Json?
+  coachAnalysisUpdatedAt DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  targetCompany          String?
+  user                   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id         String       @id @default(uuid())
+  userId     String
+  fileName   String
+  fileType   String
+  fileSize   Int
+  fileUrl    String
+  rawText    String?
+  parsedData Json?
+  uploadedAt DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  status     ResumeStatus @default(UPLOADING)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Interview {
+  id                   String              @id @default(uuid())
+  userId               String
+  role                 String
+  experienceLevel      ExperienceLevel
+  interviewType        InterviewType
+  difficulty           Difficulty
+  durationMinutes      Int
+  questionCount        Int
+  mode                 InterviewMode
+  focusAreas           String[]            @default([])
+  source               String              @default("MANUAL")
+  status               InterviewStatus     @default(DRAFT)
+  remainingSeconds     Int?
+  currentQuestionIndex Int                 @default(0)
+  pausedAt             DateTime?
+  resumedAt            DateTime?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions            InterviewQuestion[]
+  report               InterviewReport?
+}
+
+model InterviewQuestion {
+  id               String           @id @default(uuid())
+  interviewId      String
+  questionNumber   Int
+  question         String
+  category         String
+  difficulty       Difficulty
+  createdAt        DateTime         @default(now())
+  followUpDepth    Int              @default(0)
+  isFollowUp       Boolean          @default(false)
+  parentQuestionId String?
+  topic            String?
+  answer           InterviewAnswer?
+  interview        Interview        @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+}
+
+model InterviewAnswer {
+  id          String               @id @default(uuid())
+  questionId  String               @unique
+  answerText  String?
+  audioUrl    String?
+  durationSec Int?
+  submittedAt DateTime             @default(now())
+  question    InterviewQuestion    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  evaluation  InterviewEvaluation?
+}
+
+model InterviewEvaluation {
+  id                 String          @id @default(uuid())
+  answerId           String          @unique
+  technicalScore     Int
+  communicationScore Int
+  clarityScore       Int
+  confidenceScore    Int
+  relevanceScore     Int
+  grammarScore       Int
+  overallScore       Int
+  strengths          Json?
+  weaknesses         Json?
+  suggestions        Json?
+  idealAnswer        String?
+  createdAt          DateTime        @default(now())
+  answer             InterviewAnswer @relation(fields: [answerId], references: [id], onDelete: Cascade)
+}
+
+model InterviewReport {
+  id                  String    @id @default(uuid())
+  interviewId         String    @unique
+  overallScore        Int
+  technicalScore      Int
+  communicationScore  Int
+  clarityScore        Int
+  confidenceScore     Int
+  relevanceScore      Int
+  grammarScore        Int
+  problemSolvingScore Int
+  strengths           Json?
+  weaknesses          Json?
+  improvements        Json?
+  learningPlan        Json?
+  readinessScore      Int
+  createdAt           DateTime  @default(now())
+  interview           Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+}
+
+model PracticeQuestion {
+  id          String            @id @default(uuid())
+  category    PracticeCategory
+  question    String
+  description String?
+  difficulty  Difficulty
+  topic       String?
+  answer      String?
+  createdAt   DateTime          @default(now())
+  attempts    PracticeAttempt[]
+}
+
+model PracticeAttempt {
+  id          String           @id @default(uuid())
+  userId      String
+  questionId  String
+  answer      String?
+  score       Int?
+  feedback    Json?
+  completedAt DateTime         @default(now())
+  question    PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Progress {
+  id                  String   @id @default(uuid())
+  userId              String
+  date                DateTime @default(now())
+  interviewsCompleted Int      @default(0)
+  averageScore        Float    @default(0)
+  technicalScore      Float    @default(0)
+  communicationScore  Float    @default(0)
+  confidenceScore     Float    @default(0)
+  codingScore         Float    @default(0)
+  hrScore             Float    @default(0)
+  behavioralScore     Float    @default(0)
+  aptitudeScore       Float    @default(0)
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Recommendation {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  description String?
+  category    String?
+  priority    Int      @default(0)
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSettings {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  theme              String?
+  emailNotifications Boolean  @default(true)
+  interviewReminders Boolean  @default(true)
+  voiceEnabled       Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String
+  title       String
+  description String?
+  earnedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ExperienceLevel {
+  FRESHER
+  ZERO_TO_ONE
+  ONE_TO_TWO
+  TWO_TO_FIVE
+  FIVE_PLUS
+}
+
+enum InterviewType {
+  TECHNICAL
+  HR
+  BEHAVIORAL
+  MIXED
+  CODING
+  FOCUS_PRACTICE
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+enum InterviewMode {
+  TEXT
+  VOICE
+  MIXED
+}
+
+enum InterviewStatus {
+  DRAFT
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  ABANDONED
+}
+
+enum ResumeStatus {
+  UPLOADING
+  PROCESSING
+  PARSED
+  FAILED
+}
+
+enum PracticeCategory {
+  CODING
+  HR
+  BEHAVIORAL
+  APTITUDE
+  TECHNICAL
+}
+
+enum NotificationType {
+  NORMAL_PRACTICE_REMINDER
+  FOCUS_PRACTICE_REMINDER
+  INTERVIEW_RESULT
+  PERSONAL_BEST
+  DAILY_TIP
+  PRACTICE_STREAK
+  ACHIEVEMENT
+}
+
+model Notification {
+  id           String           @id @default(uuid())
+  userId       String
+  type         NotificationType
+  title        String
+  message      String
+  actionUrl    String?
+  relatedId    String?
+  read         Boolean          @default(false)
+  readAt       DateTime?
+  scheduledFor DateTime?
+  triggeredAt  DateTime?
+  createdAt    DateTime         @default(now())
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, type])
+  @@index([userId, scheduledFor])
+}
+
+model NotificationSettings {
+  id                     String   @id @default(uuid())
+  userId                 String   @unique
+  notifyNormalReminder   Boolean  @default(true)
+  notifyFocusReminder    Boolean  @default(true)
+  notifyResult           Boolean  @default(true)
+  notifyPersonalBest     Boolean  @default(true)
+  notifyDailyTip         Boolean  @default(true)
+  notifyStreak           Boolean  @default(true)
+  notifyAchievement      Boolean  @default(true)
+  browserNotifications   Boolean  @default(false)
+  dailyTipTime           String?  @default("09:00")
+  defaultReminderMinutes Int      @default(60)
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserStreak {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  currentStreak  Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastActivityAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DailyActivity {
+  id        String   @id @default(uuid())
+  userId    String
+  date      String // Format: YYYY-MM-DD
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
