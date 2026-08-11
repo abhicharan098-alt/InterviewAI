@@ -26,36 +26,21 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
   const point = payload[0].payload;
   const dateLabel = point.fullDateTime || label;
-  const stats = point.dailyStats;
 
   return (
     <div className="rounded-xl border border-white/[0.1] bg-[#0D1424] px-4 py-3 shadow-xl">
-      <p className="mb-2 text-xs font-medium text-slate-400">{dateLabel}</p>
-      
-      <div className="mb-3 flex items-center justify-between gap-6 text-sm">
+      <div className="mb-2 flex items-center justify-between gap-6 text-xs">
+        <span className="font-semibold text-slate-400">Date</span>
+        <span className="font-medium text-slate-300">{dateLabel}</span>
+      </div>
+
+      <div className="flex items-center justify-between gap-6 text-sm">
         <span className="font-semibold text-white">Score</span>
         <span className="text-lg font-bold text-white tabular-nums">
           {payload[0].value}
           <span className="text-purple-400">%</span>
         </span>
       </div>
-
-      {stats && (
-        <div className="flex flex-col gap-1.5 border-t border-white/10 pt-2">
-          <div className="flex items-center justify-between gap-4 text-[11px]">
-            <span className="font-semibold text-slate-400">DAILY MAX</span>
-            <span className="font-bold text-purple-400">{stats.max}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-4 text-[11px]">
-            <span className="font-medium text-slate-400">DAILY AVG</span>
-            <span className="font-semibold text-purple-400/90">{stats.avg}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-4 text-[11px]">
-            <span className="font-medium text-slate-500">DAILY MIN</span>
-            <span className="font-medium text-purple-400/70">{stats.min}%</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

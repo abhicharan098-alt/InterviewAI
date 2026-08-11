@@ -5,80 +5,84 @@ export type RawChartDataPoint = {
 
 export type ChartDataPoint = {
   date: string; // The original timestamp
-  displayDate: string; // "Aug 11" or "" (only first point of day has label)
-  fullDateTime: string; // "Aug 11, 2026"
+  displayDate: string; // "Aug 9" (one label per day)
+  fullDateTime: string; // "Aug 9, 2026" (calendar date only, no time)
   score: number;
-  dailyStats: {
-    max: number;
-    min: number;
-    avg: number;
-  };
 };
 
 /**
  * Prepares raw performance data for Recharts.
- * Sorts chronologically and formats dates, but preserves EVERY individual session.
- * Does NOT aggregate or modify scores.
+ *
+ * Pipeline:
+ *   records
+ *   → valid completed records
+ *   → group by local calendar date
+ *   → sort each day by exact completion timestamp
+ *   → take the LATEST completed interview for each day
+ *   → one point per calendar day
+ *   → chronological chart data
+ *
+ * Scores are NEVER transformed: the point for a day is exactly the score
+ * stored for the latest completed interview on that calendar day.
  */
 export function prepareChartData<T extends RawChartDataPoint>(
   data: T[]
 ): ChartDataPoint[] {
   if (!data || data.length === 0) return [];
 
-  // Filter out invalid null/undefined scores, but keep 0
-  const validData = data.filter((item) => item.score !== null && item.score !== undefined);
+  // 1. Filter out invalid records (null/undefined scores, invalid dates). Keep 0.
+  const validData = data.filter(
+    (item) =>
+      item.score !== null &&
+      item.score !== undefined &&
+      !Number.isNaN(item.score) &&
+      !Number.isNaN(new Date(item.date).getTime())
+  );
 
-  // 1. Sort strictly by timestamp ascending
-  const sortedData = [...validData].sort((a, b) => {
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  if (validData.length === 0) return [];
+
+  // Local calendar date key (user's local timezone)
+  const localDayKey = (dateObj: Date) =>
+    `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
+
+  // 2. Group records by local calendar date
+  const dailyGroups = new Map<string, T[]>();
+  validData.forEach((item) => {
+    const key = localDayKey(new Date(item.date));
+    if (!dailyGroups.has(key)) dailyGroups.set(key, []);
+    dailyGroups.get(key)!.push(item);
   });
 
-  // 2. Group by date to calculate daily stats
-  const dailyGroups = new Map<string, number[]>();
-  sortedData.forEach((item) => {
+  // 3. For each day, sort by exact completion timestamp and take the latest record
+  const dailyPoints: T[] = [];
+  dailyGroups.forEach((records) => {
+    const latest = [...records].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    )[records.length - 1];
+    dailyPoints.push(latest);
+  });
+
+  // 4. Sort the daily points chronologically
+  dailyPoints.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  // 5. Map to chart points — one per calendar day, date-only labels, no time
+  const chartLocale = "en-US";
+  return dailyPoints.map((item) => {
     const dateObj = new Date(item.date);
-    const dayKey = dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-    if (!dailyGroups.has(dayKey)) dailyGroups.set(dayKey, []);
-    dailyGroups.get(dayKey)!.push(item.score!);
-  });
-
-  const dailyStats = new Map<string, { max: number; min: number; avg: number }>();
-  dailyGroups.forEach((scores, dayKey) => {
-    dailyStats.set(dayKey, {
-      max: Math.max(...scores),
-      min: Math.min(...scores),
-      avg: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-    });
-  });
-
-  // 3. Map every individual valid session to a chart point
-  const seenDates = new Set<string>();
-
-  const chartPoints = sortedData.map((item) => {
-    const dateObj = new Date(item.date);
-    const dayKey = dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-    const shortDayKey = dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-    
-    let displayLabel = "";
-    if (!seenDates.has(dayKey)) {
-      displayLabel = shortDayKey;
-      seenDates.add(dayKey);
-    }
-    
     return {
       date: item.date,
-      displayDate: displayLabel,
-      fullDateTime: dateObj.toLocaleDateString(undefined, {
+      displayDate: dateObj.toLocaleDateString(chartLocale, {
+        month: "short",
+        day: "numeric",
+      }),
+      fullDateTime: dateObj.toLocaleDateString(chartLocale, {
         month: "short",
         day: "numeric",
         year: "numeric",
-        hour: "numeric",
-        minute: "numeric",
       }),
       score: item.score!,
-      dailyStats: dailyStats.get(dayKey)!,
     };
   });
-
-  return chartPoints;
 }

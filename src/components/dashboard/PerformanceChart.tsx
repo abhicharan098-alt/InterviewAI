@@ -13,29 +13,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const point = payload[0].payload;
     const dateLabel = point.fullDateTime || label;
-    const stats = point.dailyStats;
     return (
       <div className="rounded-xl border border-white/[0.08] bg-[#0D1424]/90 p-4 shadow-2xl backdrop-blur-xl">
-        <p className="mb-3 text-sm font-medium text-slate-300">{dateLabel}</p>
-        
-        <div className="mb-3 flex items-center justify-between gap-6 text-base">
-          <span className="font-semibold text-white">Score</span>
-          <span className="font-bold text-white">{payload[0].value}%</span>
+        <div className="mb-3 flex items-center justify-between gap-6 text-sm">
+          <span className="font-semibold text-white">Date</span>
+          <span className="font-medium text-slate-300">{dateLabel}</span>
         </div>
 
-        <div className="flex flex-col gap-1.5 border-t border-white/10 pt-3">
-          <div className="flex items-center justify-between gap-6 text-xs">
-            <span className="font-semibold text-slate-300">DAILY MAX</span>
-            <span className="font-bold text-purple-400">{stats?.max ?? 0}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-6 text-xs">
-            <span className="font-medium text-slate-400">DAILY AVG</span>
-            <span className="font-semibold text-purple-400/90">{stats?.avg ?? 0}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-6 text-xs">
-            <span className="text-slate-500">DAILY MIN</span>
-            <span className="font-medium text-purple-400/70">{stats?.min ?? 0}%</span>
-          </div>
+        <div className="flex items-center justify-between gap-6 text-base">
+          <span className="font-semibold text-white">Score</span>
+          <span className="font-bold text-white">{payload[0].value}%</span>
         </div>
       </div>
     );
