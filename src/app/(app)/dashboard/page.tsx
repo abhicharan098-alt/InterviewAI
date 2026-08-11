@@ -141,11 +141,13 @@ export default async function DashboardPage() {
 
     const scores = reports.map((r) => r.overallScore);
 
-    const chartData = reportRows.map((r) => ({
-      date: (r.completedAt ?? r.createdAt).toISOString(),
-      score: r.report?.overallScore || 0,
-      role: r.role
-    }));
+    const chartData = reportRows
+      .filter((r) => r.report && typeof r.report.overallScore === 'number')
+      .map((r) => ({
+        date: (r.completedAt ?? r.createdAt).toISOString(),
+        score: r.report!.overallScore,
+        role: r.role
+      }));
 
     data = {
       greetingName: firstName,

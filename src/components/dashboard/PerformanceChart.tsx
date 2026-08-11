@@ -1,90 +1,40 @@
 "use client";
 
 import { Area, Line, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { prepareChartData, RawChartDataPoint } from "@/lib/chartUtils";
 
-type ChartData = {
-  date: string;
-  score: number;
+type ChartData = RawChartDataPoint & {
   role: string;
 };
 
-const customSmoothCurve = (context: any) => {
-  let points: [number, number][] = [];
-  let isArea = false;
-  let lineCount = 0;
-  
-  return {
-    areaStart() {
-      isArea = true;
-      lineCount = 0;
-    },
-    areaEnd() {
-      isArea = false;
-    },
-    lineStart() {
-      points = [];
-    },
-    lineEnd() {
-      if (points.length === 0) return;
-      
-      if (isArea && lineCount > 0) {
-        context.lineTo(points[0][0], points[0][1]);
-      } else {
-        context.moveTo(points[0][0], points[0][1]);
-      }
-      
-      lineCount++;
-      
-      if (points.length === 1) return;
-      
-      if (points.length === 2) {
-        const [p0, p1] = points;
-        const midX = (p0[0] + p1[0]) / 2;
-        context.bezierCurveTo(midX, p0[1], midX, p1[1], p1[0], p1[1]);
-        return;
-      }
-      
-      const tension = 0.25;
-      
-      for (let i = 0; i < points.length - 1; i++) {
-        const p0 = i === 0 ? points[0] : points[i - 1];
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const p3 = i === points.length - 2 ? points[i + 1] : points[i + 2];
-        
-        const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
-        const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
-        
-        const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
-        const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
-        
-        context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
-      }
-    },
-    point(x: number, y: number) {
-      points.push([+x, +y]);
-    }
-  };
-};
 
-const CustomTooltip = ({ active, payload, label, globalStats }: any) => {
+
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
-    const dateLabel = payload[0].payload.fullDateTime || label;
+    const point = payload[0].payload;
+    const dateLabel = point.fullDateTime || label;
+    const stats = point.dailyStats;
     return (
       <div className="rounded-xl border border-white/[0.08] bg-[#0D1424]/90 p-4 shadow-2xl backdrop-blur-xl">
         <p className="mb-3 text-sm font-medium text-slate-300">{dateLabel}</p>
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-6 text-sm">
-            <span className="font-semibold text-white">MAX SCORE</span>
-            <span className="font-bold text-purple-400">{globalStats.max}%</span>
+        
+        <div className="mb-3 flex items-center justify-between gap-6 text-base">
+          <span className="font-semibold text-white">Score</span>
+          <span className="font-bold text-white">{payload[0].value}%</span>
+        </div>
+
+        <div className="flex flex-col gap-1.5 border-t border-white/10 pt-3">
+          <div className="flex items-center justify-between gap-6 text-xs">
+            <span className="font-semibold text-slate-300">DAILY MAX</span>
+            <span className="font-bold text-purple-400">{stats?.max ?? 0}%</span>
           </div>
-          <div className="flex items-center justify-between gap-6 text-sm">
-            <span className="font-medium text-slate-200">AVG SCORE</span>
-            <span className="font-semibold text-purple-400/90">{globalStats.avg}%</span>
+          <div className="flex items-center justify-between gap-6 text-xs">
+            <span className="font-medium text-slate-400">DAILY AVG</span>
+            <span className="font-semibold text-purple-400/90">{stats?.avg ?? 0}%</span>
           </div>
-          <div className="flex items-center justify-between gap-6 text-sm">
-            <span className="text-slate-400">MIN SCORE</span>
-            <span className="font-medium text-purple-400/70">{globalStats.min}%</span>
+          <div className="flex items-center justify-between gap-6 text-xs">
+            <span className="text-slate-500">DAILY MIN</span>
+            <span className="font-medium text-purple-400/70">{stats?.min ?? 0}%</span>
           </div>
         </div>
       </div>
@@ -102,44 +52,8 @@ export function PerformanceChart({ data }: { data: ChartData[] }) {
     );
   }
 
-  // Aggregate data by LOCAL calendar date and calculate daily averages
-  const groupedData: Record<string, { dateObj: Date; scores: number[]; roles: string[] }> = {};
-
-  [...data].reverse().forEach(item => {
-    const dateObj = new Date(item.date);
-    // Use the user's local timezone to determine the calendar day
-    const localDateStr = dateObj.toLocaleDateString(); 
-    
-    if (!groupedData[localDateStr]) {
-      groupedData[localDateStr] = {
-        dateObj,
-        scores: [],
-        roles: []
-      };
-    }
-    groupedData[localDateStr].scores.push(item.score);
-    if (item.role) groupedData[localDateStr].roles.push(item.role);
-  });
-
-  const chartData = Object.values(groupedData).map((group) => {
-    // Average score for the day
-    const avgScore = group.scores.length > 0 
-      ? Math.round(group.scores.reduce((a, b) => a + b, 0) / group.scores.length)
-      : 0;
-    
-    const displayDate = group.dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    
-    return {
-      date: group.dateObj.toISOString(),
-      displayDate,
-      score: avgScore,
-      // For aggregated daily points, the tooltip just shows the day
-      fullDateTime: group.dateObj.toLocaleDateString(undefined, {
-        month: 'short', day: 'numeric', year: 'numeric'
-      }),
-      role: Array.from(new Set(group.roles)).join(", ")
-    };
-  });
+  // Use exactly one point per valid interview, sorted chronologically
+  const chartData = prepareChartData(data);
 
   const CustomDot = (props: any) => {
     const { cx, cy, index } = props;
@@ -164,14 +78,6 @@ export function PerformanceChart({ data }: { data: ChartData[] }) {
         <circle cx={cx} cy={cy} r={3} fill="#FFFFFF" />
       </g>
     );
-  };
-
-  const allScores = data.map(d => d.score);
-  const positiveScores = allScores.filter(score => score > 0);
-  const globalStats = {
-    max: allScores.length ? Math.max(...allScores) : 0,
-    min: positiveScores.length ? Math.min(...positiveScores) : 0,
-    avg: allScores.length ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : 0,
   };
 
   return (
@@ -227,10 +133,10 @@ export function PerformanceChart({ data }: { data: ChartData[] }) {
             />
             <Tooltip 
               cursor={{ stroke: 'rgba(139, 92, 246, 0.2)', strokeWidth: 2, strokeDasharray: '5 5' }}
-              content={(props) => <CustomTooltip {...props} globalStats={globalStats} />}
+              content={(props) => <CustomTooltip {...props} />}
             />
             <Area 
-              type={customSmoothCurve as any} 
+              type="monotone" 
               dataKey="score" 
               stroke="none" 
               fillOpacity={1} 
@@ -240,7 +146,7 @@ export function PerformanceChart({ data }: { data: ChartData[] }) {
               animationEasing="ease-in-out"
             />
             <Line 
-              type={customSmoothCurve as any}
+              type="monotone"
               dataKey="score"
               stroke="url(#lineGradient)"
               strokeWidth={3}

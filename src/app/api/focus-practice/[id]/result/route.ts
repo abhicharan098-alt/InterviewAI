@@ -45,7 +45,7 @@ export async function GET(
     );
 
     const questionsCount = answeredQuestions.length;
-    let overallScore = 0;
+    let overallScore: number | null = null;
     const focusAreaStats: Record<string, { totalScore: number; count: number; score: number }> = {};
     const strengths: string[] = [];
     const weaknesses: string[] = [];
@@ -63,7 +63,7 @@ export async function GET(
       // We stored the score identically in all fields in our next route, so we can just use overallScore
       const score = evalData.overallScore;
 
-      overallScore += score;
+      overallScore = (overallScore || 0) + score;
 
       if (!focusAreaStats[area]) {
         focusAreaStats[area] = { totalScore: 0, count: 0, score: 0 };
@@ -76,7 +76,7 @@ export async function GET(
       if (evalData.suggestions && typeof evalData.suggestions === "string") tips.push(evalData.suggestions);
     });
 
-    if (questionsCount > 0) {
+    if (questionsCount > 0 && overallScore !== null) {
       overallScore = Math.round(overallScore / questionsCount);
     }
 

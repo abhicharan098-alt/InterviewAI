@@ -448,6 +448,16 @@ export default function InterviewEnginePage() {
         setInterview((prev: any) => {
           const updatedQuestions = [...prev.questions];
           updatedQuestions.splice(currentIndex + 1, 0, adaptiveFollowUp);
+          
+          // Mimic backend: remove the last unanswered question to maintain the strict limit
+          for (let i = updatedQuestions.length - 1; i >= 0; i--) {
+            // Do not remove the current question or the newly inserted follow-up
+            if (!updatedQuestions[i].answer && i !== currentIndex && i !== currentIndex + 1) {
+              updatedQuestions.splice(i, 1);
+              break;
+            }
+          }
+
           return { ...prev, questions: updatedQuestions };
         });
         setCurrentIndex((c) => c + 1);

@@ -348,7 +348,7 @@ export default function InterviewResultPage() {
             { label: "Answered", value: answered, icon: CheckCircle },
             { label: "Skipped", value: skipped, icon: Target },
             { label: "Duration", value: `${durationStr}m`, icon: Clock },
-            { label: "Questions", value: interview.questions.length, icon: Layers },
+            { label: "Questions", value: interview.questionCount || interview.questions.length, icon: Layers },
           ].map(({ label, value, icon: Icon }) => (
             <div
               key={label}

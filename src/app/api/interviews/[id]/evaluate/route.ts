@@ -67,6 +67,35 @@ export async function POST(
       if (existingEval) {
         evaluationData = existingEval;
       } else {
+        // Duplicate check against previous questions
+        const currentAnswerText = q.answer.answerText.trim().toLowerCase();
+        const previousAnswers = interview.questions
+          .filter(prevQ => prevQ.questionNumber < q.questionNumber && prevQ.answer && prevQ.answer.answerText && prevQ.answer.answerText !== "[SKIPPED]")
+          .map(prevQ => prevQ.answer!.answerText!.trim().toLowerCase());
+          
+        const isDuplicate = previousAnswers.some(prev => 
+          (prev === currentAnswerText && currentAnswerText.length > 10) || 
+          (prev.length > 30 && currentAnswerText.length > 30 && (currentAnswerText.includes(prev) || prev.includes(currentAnswerText)))
+        );
+
+        if (isDuplicate) {
+          evaluationData = await prisma.interviewEvaluation.create({
+            data: {
+              answerId: q.answer.id,
+              technicalScore: 0,
+              communicationScore: 0,
+              clarityScore: 0,
+              confidenceScore: 0,
+              relevanceScore: 0,
+              grammarScore: 0,
+              overallScore: 0,
+              strengths: ["None."],
+              weaknesses: ["The answer provided was completely irrelevant or addressed a different question entirely."],
+              suggestions: ["Ensure you are listening to the specific question asked and responding directly to it, rather than reusing previous answers."],
+              idealAnswer: "N/A - Answer was a duplicate.",
+            }
+          });
+        } else {
           const result = await evaluateAnswer({
           role: interview.role,
           experienceLevel: interview.experienceLevel,
@@ -110,6 +139,7 @@ export async function POST(
             throw createError;
           }
         }
+        }
       }
 
       totalTech += evaluationData.technicalScore;
@@ -127,8 +157,14 @@ export async function POST(
       validAnswers++;
     }
 
-    // Default to 0 if no valid answers
-    const safeDiv = (total: number) => validAnswers > 0 ? Math.round(total / validAnswers) : 0;
+    if (validAnswers === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "No valid answers to evaluate. Report not created.",
+      });
+    }
+
+    const safeDiv = (total: number) => Math.round(total / validAnswers);
 
     const finalTech = safeDiv(totalTech);
     const finalComm = safeDiv(totalComm);

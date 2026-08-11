@@ -31,7 +31,10 @@ export async function POST(
       where: { id, userId },
       include: {
         questions: {
-          orderBy: { createdAt: "asc" },
+          orderBy: [
+            { questionNumber: "asc" },
+            { createdAt: "asc" },
+          ],
           include: { answer: true },
         },
       },
@@ -116,12 +119,9 @@ export async function POST(
       }));
 
     /* 7.5. Question Count Guard */
-    // Note: 'previousQA.length' equals the number of questions that have an answer (i.e. already submitted and processed).
-    // The *current* question's answer is in the request body (data.answer) but not necessarily in previousQA yet if it wasn't saved before this call.
-    // However, since `adaptive` route is usually called concurrently or right after the answer is saved... Wait, let's just count `interview.questions` that are answered PLUS one for the current if it's not in the list.
-    // To be perfectly safe against follow-up expansion:
-    // If we've already answered or are currently answering the final slot, do not generate a follow-up.
-    const answeredCount = previousQA.length + (previousQA.some(qa => qa.question === currentQuestion.question) ? 0 : 1);
+    // Note: The previousQA array includes all questions that have an answer.
+    // If the user just answered this question, it is ALREADY included in previousQA because we fetch all questions & answers from DB.
+    const answeredCount = previousQA.length;
     
     if (answeredCount >= interview.questionCount) {
       return NextResponse.json({
@@ -150,19 +150,36 @@ export async function POST(
 
     /* 9. If action is FOLLOW_UP, persist question into database */
     if (decision.action === "FOLLOW_UP" && decision.question && decision.question.trim().length >= 5) {
-      const newFollowUp = await prisma.interviewQuestion.create({
-        data: {
-          interviewId: interview.id,
-          questionNumber: currentQuestion.questionNumber, // Same base question number sequence
-          question: decision.question.trim(),
-          category: currentQuestion.category,
-          difficulty: decision.difficulty,
-          isFollowUp: true,
-          parentQuestionId: currentQuestion.id,
-          topic: decision.topic || currentQuestion.category,
-          followUpDepth: (currentQuestion.followUpDepth || 0) + 1,
-        },
-      });
+      // Find the last unanswered question to remove, maintaining the strict count limit
+      // It must not be the current question. We don't care if it's original or follow-up, just that it's unanswered.
+      const lastUnanswered = [...interview.questions].reverse().find(
+        (q) => !q.answer && q.id !== currentQuestion.id
+      );
+
+      if (!lastUnanswered) {
+        // Strict limit guard: if there are no unanswered questions left to replace, we CANNOT add a follow-up.
+        return NextResponse.json({
+          action: "NEXT_TOPIC",
+          question: null,
+        });
+      }
+
+      const [newFollowUp] = await prisma.$transaction([
+        prisma.interviewQuestion.create({
+          data: {
+            interviewId: interview.id,
+            questionNumber: currentQuestion.questionNumber, // Same base question number sequence
+            question: decision.question.trim(),
+            category: currentQuestion.category,
+            difficulty: decision.difficulty,
+            isFollowUp: true,
+            parentQuestionId: currentQuestion.id,
+            topic: decision.topic || currentQuestion.category,
+            followUpDepth: (currentQuestion.followUpDepth || 0) + 1,
+          },
+        }),
+        prisma.interviewQuestion.delete({ where: { id: lastUnanswered.id } }),
+      ]);
 
       return NextResponse.json({
         action: "FOLLOW_UP",

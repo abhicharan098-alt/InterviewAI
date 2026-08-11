@@ -256,6 +256,42 @@ export default function FocusPracticeSessionPage() {
     }
   };
 
+  const handleSkip = async () => {
+    if (!currentQuestion) return;
+    setIsSubmitting(true);
+    
+    try {
+      const res = await fetch(`/api/interviews/focus-practice/next`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interviewId: id,
+          questionId: currentQuestion.id,
+          answerText: "[SKIPPED]",
+          durationSec: 0,
+        }),
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setFeedback(data.evaluation);
+        if (data.isComplete) {
+          setIsComplete(true);
+        } else if (data.nextQuestion) {
+          setCurrentQuestion(data.nextQuestion);
+          setInterview((prev: any) => ({
+            ...prev,
+            questions: [...prev.questions, data.nextQuestion]
+          }));
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = () => {
     if (isComplete) {
       router.push(`/focus-practice/result/${id}`);
@@ -464,13 +500,22 @@ export default function FocusPracticeSessionPage() {
                 />
               </div>
               
-              <button
-                onClick={handleSubmit}
-                disabled={!answerText.trim() || isSubmitting}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-white/10 py-3.5 font-semibold text-white hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Answer"}
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleSkip}
+                  disabled={isSubmitting}
+                  className="w-1/3 flex items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.02] py-3.5 font-semibold text-white hover:bg-white/[0.06] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Skip
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!answerText.trim() || isSubmitting}
+                  className="w-2/3 flex items-center justify-center gap-2 rounded-xl bg-white/10 py-3.5 font-semibold text-white hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Answer"}
+                </button>
+              </div>
             </div>
           )}
         </div>

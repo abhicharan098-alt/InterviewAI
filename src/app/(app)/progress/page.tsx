@@ -292,12 +292,14 @@ export default async function ProgressPage() {
   const avgConf = avg(withReports.map((i) => i.report!.confidenceScore));
   const avgRel = avg(withReports.map((i) => i.report!.relevanceScore));
 
-  /* trend chart data — ordered chronologically */
-  const trendData = withReports.map((i, idx) => ({
-    label: fmtShort(i.completedAt ?? i.createdAt),
-    score: i.report!.readinessScore,
-    interviewId: i.id,
-  }));
+  /* trend chart data — send raw timestamp and score to client */
+  const trendData = withReports
+    .filter((i) => typeof i.report?.readinessScore === 'number')
+    .map((i) => ({
+      date: (i.completedAt ?? i.createdAt).toISOString(),
+      score: i.report!.readinessScore,
+      interviewId: i.id,
+    }));
 
   /* score change */
   let scoreChange: number | null = null;

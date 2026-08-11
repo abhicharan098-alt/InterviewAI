@@ -63,20 +63,20 @@ export default function FocusPracticeSetupPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-6 bg-[#050814]">
-      <Reveal className="w-full max-w-xl">
-        <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-8 shadow-2xl relative overflow-hidden">
-          {starting && (
-            <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] flex-col items-center justify-center bg-[#050814]/90 backdrop-blur-md p-6 text-center">
-              <Loader2 className="mb-4 h-12 w-12 animate-spin text-purple-400" />
-              <h2 className="mb-2 text-xl font-bold text-white">
-                Preparing Focus Practice...
-              </h2>
-            </div>
-          )}
-          
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-purple-500/10 text-purple-400 ring-1 ring-inset ring-purple-500/20">
+    <>
+      {starting && (
+        <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] flex-col items-center justify-center bg-[#050814]/90 backdrop-blur-md p-6 text-center">
+          <Loader2 className="mb-4 h-12 w-12 animate-spin text-purple-400" />
+          <h2 className="mb-2 text-xl font-bold text-white">
+            Preparing Focus Practice...
+          </h2>
+        </div>
+      )}
+      <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-6 bg-[#050814]">
+        <Reveal className="w-full max-w-xl">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-8 shadow-2xl relative overflow-hidden">
+            <div className="text-center mb-8">
+              <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-purple-500/10 text-purple-400 ring-1 ring-inset ring-purple-500/20">
               <Target className="h-7 w-7" />
             </div>
             <h1 className="mb-2 text-2xl font-bold text-white">Configure Focus Practice</h1>
@@ -222,5 +222,6 @@ export default function FocusPracticeSetupPage() {
         </div>
       </Reveal>
     </div>
+    </>
   );
 }

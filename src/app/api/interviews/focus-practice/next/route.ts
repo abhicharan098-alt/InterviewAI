@@ -26,7 +26,11 @@ export async function POST(req: Request) {
 
     const interview = await prisma.interview.findUnique({
       where: { id: data.interviewId, userId: session.user.id },
-      include: { questions: true },
+      include: { 
+        questions: {
+          include: { answer: true }
+        } 
+      },
     });
 
     if (!interview) {
@@ -59,12 +63,32 @@ export async function POST(req: Request) {
 
     // 2. Evaluate the Answer if not skipped
     if (!data.skipped) {
-      const targetFocusArea = currentQuestion.category || "General";
-      evaluation = await FocusPracticeEvaluationService.evaluateAnswer(
-        currentQuestion.question,
-        data.answerText,
-        targetFocusArea
+      const previousAnswers = interview.questions
+        .filter(q => q.id !== currentQuestion.id && q.answer && q.answer.answerText && q.answer.answerText !== "[SKIPPED]")
+        .map(q => q.answer!.answerText!.trim().toLowerCase());
+        
+      const currentAnswerText = data.answerText.trim().toLowerCase();
+      const isDuplicate = previousAnswers.some(prev => 
+        (prev === currentAnswerText && currentAnswerText.length > 10) || 
+        (prev.length > 30 && currentAnswerText.length > 30 && (currentAnswerText.includes(prev) || prev.includes(currentAnswerText)))
       );
+
+      if (isDuplicate) {
+        evaluation = {
+          relevanceScore: 0,
+          score: 0,
+          strength: "None.",
+          weakness: "You provided the exact same answer as a previous question.",
+          suggestion: "Each question assesses a different skill. You must provide a unique, relevant answer for each question.",
+        };
+      } else {
+        const targetFocusArea = currentQuestion.category || "General";
+        evaluation = await FocusPracticeEvaluationService.evaluateAnswer(
+          currentQuestion.question,
+          data.answerText,
+          targetFocusArea
+        );
+      }
 
       // Save Evaluation
       await prisma.interviewEvaluation.upsert({
