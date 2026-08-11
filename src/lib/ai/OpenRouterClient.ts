@@ -22,7 +22,7 @@ export async function generateText(options: GenerateTextOptions): Promise<string
         headers: {
           "Authorization": `Bearer ${env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
+          "HTTP-Referer": process.env.NEXTAUTH_URL || "https://your-domain.com",
           "X-Title": "InterviewAI"
         },
         body: JSON.stringify({

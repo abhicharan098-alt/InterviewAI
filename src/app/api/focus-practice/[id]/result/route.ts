@@ -122,6 +122,7 @@ export async function GET(
       report: {
         overallScore,
         questionsAnswered: questionsCount,
+        questionsSkipped: interview.questions.length - questionsCount,
         focusAreasPracticed: Object.keys(focusAreaStats).filter(k => focusAreaStats[k].count > 0).length,
         focusAreaScores: focusAreaStats,
         strongestArea,

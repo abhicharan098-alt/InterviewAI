@@ -51,7 +51,7 @@ function DeleteConfirmModal({
   onCancel: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 shadow-2xl text-center">
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-400/25">
           <Trash2 className="h-6 w-6" />

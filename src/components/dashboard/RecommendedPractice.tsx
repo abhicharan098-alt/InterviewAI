@@ -61,7 +61,7 @@ export function RecommendedPractice({
   }
 
   return (
-    <div data-chaos-item="true" className="flex flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] overflow-hidden">
+    <div className="flex flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] overflow-hidden">
       <div className="flex items-center gap-4 border-b border-white/[0.04] p-5 shrink-0">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-400">
           <BookOpen className="h-5 w-5" />

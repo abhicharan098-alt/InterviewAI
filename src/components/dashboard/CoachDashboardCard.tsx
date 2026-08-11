@@ -47,7 +47,7 @@ export function CoachDashboardCard() {
   const hasData = data && data.totalInterviews > 0;
 
   return (
-    <div data-chaos-item="true" className="flex flex-col rounded-2xl border border-purple-500/30 bg-purple-500/[0.04] p-5 md:p-6 shadow-xl shadow-purple-900/10">
+    <div className="flex flex-col rounded-2xl border border-purple-500/30 bg-purple-500/[0.04] p-5 md:p-6 shadow-xl shadow-purple-900/10">
       <div className="flex items-center gap-3 mb-5">
         <div className="grid h-8 w-8 place-items-center rounded-lg bg-purple-500/20">
           <BrainCircuit className="h-4 w-4 text-purple-300" />

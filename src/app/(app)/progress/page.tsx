@@ -442,7 +442,6 @@ export default async function ProgressPage() {
             <section className="mt-8">
               <Reveal>
                 <Link
-                  data-chaos-item="true"
                   href="/coach"
                   className="group flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-purple-500/30 bg-purple-500/[0.04] p-5 md:p-6 shadow-xl shadow-purple-900/10 transition-colors hover:bg-purple-500/[0.08]"
                 >
@@ -482,7 +481,7 @@ export default async function ProgressPage() {
                     </p>
                   </div>
                 ) : (
-                  <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 md:p-7">
+                  <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 md:p-7">
                     <ProgressChart data={trendData} />
                   </div>
                 )}
@@ -493,7 +492,7 @@ export default async function ProgressPage() {
             <section className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Skill Breakdown */}
               <Reveal delay={0}>
-                <div data-chaos-item="true" className="flex h-full flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
+                <div className="flex h-full flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
                   <h2 className="mb-5 text-xl font-semibold tracking-tight text-white">Skill Breakdown</h2>
                   <div className="flex flex-1 flex-col justify-center gap-6">
                     <PerformanceBar label="Technical" value={avgTech ?? 0} delay={0} />
@@ -506,7 +505,7 @@ export default async function ProgressPage() {
 
               {/* Insights */}
               <Reveal delay={80}>
-                <div data-chaos-item="true" className="flex h-full flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
+                <div className="flex h-full flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
                   <h2 className="mb-5 text-xl font-semibold tracking-tight text-white">Performance Insights</h2>
                   <div className="flex flex-1 flex-col justify-center gap-4">
                     {/* Strongest */}
@@ -589,7 +588,7 @@ export default async function ProgressPage() {
               <section className="mt-8">
                 <Reveal>
                   <SectionHeading title="Best Performance" />
-                  <div data-chaos-item="true" className="overflow-hidden rounded-2xl border border-purple-500/20 bg-[#0D1424]">
+                  <div className="overflow-hidden rounded-2xl border border-purple-500/20 bg-[#0D1424]">
                     <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between md:p-7">
                       <div className="flex items-center gap-4">
                         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-purple-500/20 to-violet-500/20 text-purple-300 ring-1 ring-inset ring-purple-400/25">
@@ -644,7 +643,7 @@ export default async function ProgressPage() {
                     </Link>
                   }
                 />
-                <div data-chaos-item="true" className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1424]">
+                <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1424]">
                   <ul className="divide-y divide-white/[0.06]">
                     {recent.map((item) => {
                       const reminder = remindersMap.get(item.id);
@@ -746,7 +745,7 @@ export default async function ProgressPage() {
               <section className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {rolePerf.length >= 2 && (
                   <Reveal delay={0}>
-                    <div data-chaos-item="true" className="h-full rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
+                    <div className="h-full rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
                       <h2 className="mb-5 text-xl font-semibold tracking-tight text-white">Performance by Role</h2>
                       <div className="flex flex-col gap-4">
                         {rolePerf.map(({ role, score }) => (
@@ -770,7 +769,7 @@ export default async function ProgressPage() {
 
                 {typePerf.length >= 2 && (
                   <Reveal delay={80}>
-                    <div data-chaos-item="true" className="h-full rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
+                    <div className="h-full rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
                       <h2 className="mb-5 text-xl font-semibold tracking-tight text-white">Performance by Interview Type</h2>
                       <div className="flex flex-col gap-4">
                         {typePerf.map(({ type, score }) => (

@@ -134,7 +134,7 @@ export default function CoachPage() {
         <div className="flex flex-col gap-6 lg:col-span-8">
           {/* Readiness & Summary */}
           <Reveal delay={100}>
-            <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8">
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8">
               <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
                 <div>
                   <h2 className="text-sm font-semibold uppercase tracking-widest text-purple-400">
@@ -163,7 +163,7 @@ export default function CoachPage() {
 
           {/* Skill Performance */}
           <Reveal delay={200}>
-            <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8">
+            <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8">
               <h2 className="mb-6 text-xl font-semibold tracking-tight text-white">
                 Skill Performance
               </h2>
@@ -199,7 +199,7 @@ export default function CoachPage() {
           {/* Weekly Plan */}
           {data.weeklyPlan && data.weeklyPlan.length > 0 && (
             <Reveal delay={300}>
-              <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8">
                 <h2 className="mb-6 text-xl font-semibold tracking-tight text-white">
                   This Week's Plan
                 </h2>
@@ -233,7 +233,7 @@ export default function CoachPage() {
           <Reveal delay={150}>
             <div className="flex flex-col gap-4">
               {data.strongestArea && (
-                <div data-chaos-item="true" className="rounded-2xl border border-emerald-500/20 bg-[#0D1424] p-5">
+                <div className="rounded-2xl border border-emerald-500/20 bg-[#0D1424] p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-400">
                     Your Strongest Area
                   </p>
@@ -243,7 +243,7 @@ export default function CoachPage() {
               )}
               
               {data.weakestArea && (
-                <div data-chaos-item="true" className="rounded-2xl border border-amber-500/20 bg-[#0D1424] p-5">
+                <div className="rounded-2xl border border-amber-500/20 bg-[#0D1424] p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-400">
                     Biggest Opportunity
                   </p>
@@ -265,7 +265,7 @@ export default function CoachPage() {
           {/* Repeated Patterns */}
           {data.repeatedPatterns && data.repeatedPatterns.length > 0 && (
             <Reveal delay={250}>
-              <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6">
+              <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6">
                 <h2 className="mb-5 text-lg font-semibold text-white">Repeated Patterns</h2>
                 <ul className="space-y-3">
                   {data.repeatedPatterns.map((pattern, i) => (

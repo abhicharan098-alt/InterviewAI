@@ -11,6 +11,7 @@ const NextQuestionSchema = z.object({
   questionId: z.string().uuid(),
   answerText: z.string().optional().default(""),
   durationSec: z.number().default(0),
+  skipped: z.boolean().optional().default(false),
 });
 
 export async function POST(req: Request) {
@@ -38,58 +39,63 @@ export async function POST(req: Request) {
     }
 
     // 1. Save the Answer
+    const finalAnswerText = data.skipped ? "[SKIPPED]" : data.answerText;
     const answer = await prisma.interviewAnswer.upsert({
       where: { questionId: currentQuestion.id },
       update: {
-        answerText: data.answerText,
+        answerText: finalAnswerText,
         durationSec: data.durationSec,
         submittedAt: new Date(),
       },
       create: {
         questionId: currentQuestion.id,
-        answerText: data.answerText,
+        answerText: finalAnswerText,
         durationSec: data.durationSec,
         submittedAt: new Date(),
       },
     });
 
-    // 2. Evaluate the Answer
-    const targetFocusArea = currentQuestion.category || "General";
-    const evaluation = await FocusPracticeEvaluationService.evaluateAnswer(
-      currentQuestion.question,
-      data.answerText,
-      targetFocusArea
-    );
+    let evaluation = null;
 
-    // Save Evaluation
-    await prisma.interviewEvaluation.upsert({
-      where: { answerId: answer.id },
-      update: {
-        technicalScore: evaluation.score,
-        communicationScore: evaluation.score,
-        clarityScore: evaluation.score,
-        confidenceScore: evaluation.score,
-        relevanceScore: evaluation.score,
-        grammarScore: evaluation.score,
-        overallScore: evaluation.score,
-        strengths: evaluation.strength,
-        weaknesses: evaluation.weakness,
-        suggestions: evaluation.suggestion,
-      },
-      create: {
-        answerId: answer.id,
-        technicalScore: evaluation.score,
-        communicationScore: evaluation.score,
-        clarityScore: evaluation.score,
-        confidenceScore: evaluation.score,
-        relevanceScore: evaluation.score,
-        grammarScore: evaluation.score,
-        overallScore: evaluation.score,
-        strengths: evaluation.strength,
-        weaknesses: evaluation.weakness,
-        suggestions: evaluation.suggestion,
-      },
-    });
+    // 2. Evaluate the Answer if not skipped
+    if (!data.skipped) {
+      const targetFocusArea = currentQuestion.category || "General";
+      evaluation = await FocusPracticeEvaluationService.evaluateAnswer(
+        currentQuestion.question,
+        data.answerText,
+        targetFocusArea
+      );
+
+      // Save Evaluation
+      await prisma.interviewEvaluation.upsert({
+        where: { answerId: answer.id },
+        update: {
+          technicalScore: evaluation.score,
+          communicationScore: evaluation.score,
+          clarityScore: evaluation.score,
+          confidenceScore: evaluation.score,
+          relevanceScore: evaluation.score,
+          grammarScore: evaluation.score,
+          overallScore: evaluation.score,
+          strengths: evaluation.strength,
+          weaknesses: evaluation.weakness,
+          suggestions: evaluation.suggestion,
+        },
+        create: {
+          answerId: answer.id,
+          technicalScore: evaluation.score,
+          communicationScore: evaluation.score,
+          clarityScore: evaluation.score,
+          confidenceScore: evaluation.score,
+          relevanceScore: evaluation.score,
+          grammarScore: evaluation.score,
+          overallScore: evaluation.score,
+          strengths: evaluation.strength,
+          weaknesses: evaluation.weakness,
+          suggestions: evaluation.suggestion,
+        },
+      });
+    }
 
     // 3. Determine if session is complete
     const questionsAnswered = interview.questions.length;
@@ -123,6 +129,8 @@ export async function POST(req: Request) {
       experienceLevel: interview.experienceLevel,
       resumeContext: resume?.parsedData ? JSON.stringify(resume.parsedData) : "",
       previousQuestions,
+      lastQuestion: currentQuestion.question,
+      lastAnswer: data.answerText,
     });
 
     const newQuestion = await prisma.interviewQuestion.create({

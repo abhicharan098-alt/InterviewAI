@@ -2,7 +2,7 @@ import { Lightbulb } from "lucide-react";
 
 export function DailyTip() {
   return (
-    <div data-chaos-item="true" className="flex flex-col w-full rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-[#0D1424] to-transparent p-5 lg:col-span-12 gap-5">
+    <div className="flex flex-col w-full rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-[#0D1424] to-transparent p-5 lg:col-span-12 gap-5">
       <div className="flex items-start gap-4">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-purple-500/20 text-purple-400">
           <Lightbulb className="h-5 w-5" />

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export function QuickDrill() {
   return (
-    <div data-chaos-item="true" className="flex flex-col w-full rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-[#0D1424] to-transparent p-5 shadow-xl shadow-black/20">
+    <div className="flex flex-col w-full rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-[#0D1424] to-transparent p-5 shadow-xl shadow-black/20">
       <div className="flex items-center gap-3 mb-4">
         <div className="grid h-8 w-8 place-items-center rounded-lg bg-cyan-500/20 text-cyan-400">
           <Zap className="h-4 w-4" />

@@ -193,7 +193,6 @@ export default function NotificationsPage() {
             const Icon = meta.icon;
             return (
               <div
-                data-chaos-item="true"
                 key={n.id}
                 className={`group relative overflow-hidden rounded-2xl border transition-all ${
                   n.read

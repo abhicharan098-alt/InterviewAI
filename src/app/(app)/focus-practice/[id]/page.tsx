@@ -163,6 +163,8 @@ export default function FocusPracticeSessionPage() {
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [status, setStatus] = useState<string>("DRAFT");
+  const [showEndFocusModal, setShowEndFocusModal] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
     const fetchInterview = async () => {
@@ -263,6 +265,25 @@ export default function FocusPracticeSessionPage() {
     }
   };
 
+  const handleEndFocus = async () => {
+    if (isEnding) return;
+    setIsEnding(true);
+    try {
+      const res = await fetch(`/api/interviews/${id}/complete`, { method: "POST" });
+      if (res.ok) {
+        setIsComplete(true);
+        router.push(`/focus-practice/result/${id}`);
+      } else {
+        setIsEnding(false);
+        setShowEndFocusModal(false);
+      }
+    } catch (e) {
+      console.error(e);
+      setIsEnding(false);
+      setShowEndFocusModal(false);
+    }
+  };
+
   if (!interview || !currentQuestion) {
     return (
       <div className="flex h-[80vh] items-center justify-center flex-col gap-4">
@@ -291,6 +312,47 @@ export default function FocusPracticeSessionPage() {
             setShowReminderModal(false);
           }}
         />
+      )}
+
+      {showEndFocusModal && (
+        <div 
+          className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowEndFocusModal(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setShowEndFocusModal(false);
+          }}
+        >
+          <div 
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="end-focus-title"
+          >
+            <div className="p-6">
+              <h2 id="end-focus-title" className="text-xl font-bold text-white mb-2">End Focus?</h2>
+              <p className="text-slate-400 mb-6">Are you sure you want to end this focused practice session?</p>
+              
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                <button
+                  onClick={() => setShowEndFocusModal(false)}
+                  disabled={isEnding}
+                  className="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50"
+                >
+                  Continue
+                </button>
+                <button
+                  onClick={handleEndFocus}
+                  disabled={isEnding}
+                  className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-red-500/80 border border-red-500/20 hover:bg-red-500 hover:border-red-500/40 transition-all flex items-center justify-center disabled:opacity-50"
+                >
+                  {isEnding ? <Loader2 className="h-4 w-4 animate-spin" /> : "End Focus"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
       
       <button 
@@ -324,7 +386,7 @@ export default function FocusPracticeSessionPage() {
           <p className="text-slate-400">Improve the skills you selected through targeted AI questions.</p>
         </div>
 
-        <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8 shadow-2xl mb-6 relative overflow-hidden">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8 shadow-2xl mb-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-violet-500" />
           
           <div className="flex justify-between items-center mb-6 text-sm font-medium">
@@ -413,6 +475,17 @@ export default function FocusPracticeSessionPage() {
           )}
         </div>
       </Reveal>
+      
+      {!isComplete && (
+        <div className="mt-4 flex justify-center pb-8">
+          <button
+            onClick={() => setShowEndFocusModal(true)}
+            className="rounded-full border border-white/5 bg-black/20 px-6 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+          >
+            End Focus
+          </button>
+        </div>
+      )}
     </div>
   );
 }

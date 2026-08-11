@@ -175,7 +175,6 @@ export default function FocusAreasPage() {
               const Icon = area.icon;
               return (
                 <button
-                  data-chaos-item="true"
                   key={area.id}
                   onClick={() => toggleFocusArea(area.id)}
                   className={`group relative rounded-xl border p-4 text-left transition-all flex flex-col gap-2 min-w-0 ${

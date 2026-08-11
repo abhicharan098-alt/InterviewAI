@@ -86,6 +86,17 @@ export function AIPracticeModal({ open, onOpenChange, mode }: AIPracticeModalPro
     }
   }, [open, mode]);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [open]);
+
   const generateConfig = async () => {
     setLoading(true);
     setError(null);
@@ -143,8 +154,8 @@ export function AIPracticeModal({ open, onOpenChange, mode }: AIPracticeModalPro
   });
 
   return open ? (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl text-white overflow-hidden relative">
+    <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl text-white overflow-y-auto max-h-[90dvh] relative">
         <button 
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10"

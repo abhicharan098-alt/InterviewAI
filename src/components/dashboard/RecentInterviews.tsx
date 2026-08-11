@@ -19,7 +19,7 @@ const scoreColor = (n: number) => n >= 70 ? "text-emerald-400" : n >= 50 ? "text
 
   export function RecentInterviews({ interviews }: { interviews: RecentInterview[] }) {
     return (
-      <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] flex flex-col overflow-hidden">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-white/[0.04] shrink-0">
           <h3 className="text-lg font-semibold text-white">Recent Interviews</h3>
           <Link href="/interviews" className="text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">

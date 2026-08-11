@@ -39,7 +39,7 @@ export function DailyStreak() {
 
   if (loading) {
     return (
-      <div data-chaos-item="true" className="flex h-24 w-full lg:max-w-3xl items-center justify-center rounded-2xl border border-white/[0.05] bg-[#0D1424]">
+      <div className="flex h-24 w-full lg:max-w-3xl items-center justify-center rounded-2xl border border-white/[0.05] bg-[#0D1424]">
         <Loader2 className="h-5 w-5 animate-spin text-purple-500/50" />
       </div>
     );
@@ -61,7 +61,7 @@ export function DailyStreak() {
   const isHighStreak = data.currentStreak >= 7;
 
   return (
-    <div data-chaos-item="true" className="flex w-full min-h-0 h-auto flex-col lg:flex-row lg:items-center justify-between rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-[#0D1424] to-[#0D1424] px-6 py-5 shadow-xl shadow-black/20 gap-6">
+    <div className="flex w-full min-h-0 h-auto flex-col lg:flex-row lg:items-center justify-between rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-[#0D1424] to-[#0D1424] px-6 py-5 shadow-xl shadow-black/20 gap-6">
       
       {/* LEFT: Flame, current streak, message */}
       <div className="flex items-center gap-5">

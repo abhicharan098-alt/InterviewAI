@@ -49,7 +49,7 @@ export function TopBar() {
         <div className="flex items-center gap-3 rounded-full border border-white/[0.05] bg-white/[0.02] py-1 pl-1 pr-3 transition-colors hover:bg-white/[0.04]">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-600/20 text-purple-300 shrink-0">
             {session?.user?.image ? (
-              <img src={session.user.image} alt="User" className="h-full w-full rounded-full object-cover" />
+              <img src={session.user.image} alt="User" referrerPolicy="no-referrer" className="h-full w-full rounded-full object-cover" />
             ) : (
               <User className="h-4 w-4" />
             )}

@@ -107,7 +107,7 @@ export function InterviewPauseModal({ interviewId, interviewType, interviewRole,
   };
 
   return (
-    <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#050814]/80 p-4 backdrop-blur-sm">
+    <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] items-center justify-center bg-[#050814]/80 p-4 backdrop-blur-sm">
       <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0B1120] shadow-2xl shadow-purple-900/30">
         
         {view === "PAUSED" && !standalone && (

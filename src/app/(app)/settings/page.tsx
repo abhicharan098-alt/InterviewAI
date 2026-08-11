@@ -54,7 +54,7 @@ function Section({ title, icon: Icon, children, defaultOpen = true }: {
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div data-chaos-item="true" className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0B1120]">
+    <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0B1120]">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between px-6 py-4 text-left"

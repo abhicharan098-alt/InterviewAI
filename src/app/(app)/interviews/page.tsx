@@ -117,7 +117,7 @@ export default async function InterviewsHistoryPage() {
         </header>
 
         {interviews.length === 0 ? (
-          <div data-chaos-item="true" className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.1] bg-[#0D1424]/60 p-14 text-center">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.1] bg-[#0D1424]/60 p-14 text-center">
             <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-white/[0.04] text-purple-400 ring-1 ring-inset ring-white/[0.08]">
               <Activity className="h-8 w-8" />
             </div>
@@ -145,7 +145,6 @@ export default async function InterviewsHistoryPage() {
 
               return (
                 <div
-                  data-chaos-item="true"
                   key={intv.id}
                   className="group flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 shadow-xl transition-all duration-200 hover:border-purple-500/30 hover:bg-[#10192d]"
                 >

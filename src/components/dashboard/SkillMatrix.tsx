@@ -20,7 +20,7 @@ export function SkillMatrix({
   ];
 
   return (
-    <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] flex flex-col overflow-hidden">
+    <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] flex flex-col overflow-hidden">
       <div className="flex items-center justify-between p-6 border-b border-white/[0.04] shrink-0">
         <h3 className="text-lg font-semibold text-white">Skill Performance</h3>
       </div>

@@ -578,7 +578,7 @@ export default function InterviewEnginePage() {
   const ttsSupported = typeof window !== "undefined" && "speechSynthesis" in window;
 
   return (
-    <div className="flex h-[calc(100vh-100px)] flex-col text-white">
+    <div className="flex h-full p-4 md:p-8 flex-col text-white">
       {actionError && <ErrorToast message={actionError} onClose={() => setActionError("")} />}
 
       {/* Top Action Bar */}
@@ -624,8 +624,8 @@ export default function InterviewEnginePage() {
 
       {/* Modal End Interview Confirmation */}
       {showEndDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050814]/80 backdrop-blur-sm p-4">
-          <div data-chaos-item="true" className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-[#0D1424] p-6 shadow-2xl text-center">
+        <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] items-center justify-center bg-[#050814]/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-[#0D1424] p-6 shadow-2xl text-center">
             <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-white mb-2">End Interview?</h2>
             <p className="text-sm text-slate-400 mb-6">
@@ -678,7 +678,7 @@ export default function InterviewEnginePage() {
         
         {/* Left Panel: Question Context */}
         <div className="flex flex-col lg:col-span-4 min-h-0">
-          <div data-chaos-item="true" className="flex-grow rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative overflow-hidden">
+          <div className="flex-grow rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-transparent pointer-events-none" />
             
             <div className="p-6 border-b border-white/[0.08] relative z-10 flex justify-between items-center bg-white/[0.01]">
@@ -726,7 +726,7 @@ export default function InterviewEnginePage() {
 
         {/* Center Panel: Answer Area */}
         <div className="flex flex-col lg:col-span-5 min-h-0">
-          <div data-chaos-item="true" className="flex-grow rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative">
+          <div className="flex-grow rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative">
             
             {/* Answer Control Body */}
             {interviewMode === "TEXT" && (
@@ -832,7 +832,7 @@ export default function InterviewEnginePage() {
         <div className="flex flex-col lg:col-span-3 min-h-0 gap-6">
           
           {/* Progress Card */}
-          <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-3">Interview Progress</p>
             <div className="flex items-end justify-between mb-2">
               <span className="text-2xl font-bold text-white tabular-nums">
@@ -846,7 +846,7 @@ export default function InterviewEnginePage() {
           </div>
 
           {/* Time Card */}
-          <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg flex items-center justify-between">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg flex items-center justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Time Remaining</p>
               <span className={`text-2xl font-bold tabular-nums ${timeRemaining && timeRemaining < 300 ? "text-red-400" : "text-white"}`}>
@@ -859,7 +859,7 @@ export default function InterviewEnginePage() {
           </div>
 
           {/* Settings / Mode Card */}
-          <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg flex-grow flex flex-col justify-between">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg flex-grow flex flex-col justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-4">Session Info</p>
               <div className="space-y-4">

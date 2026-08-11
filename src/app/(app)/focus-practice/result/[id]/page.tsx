@@ -101,7 +101,7 @@ export default function FocusPracticeResultPage() {
         </div>
 
         {/* Top Summary Cards */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="mb-8 grid gap-4 sm:grid-cols-4">
           <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 text-center">
             <div className="text-4xl font-bold text-emerald-400 mb-1">{report.overallScore}%</div>
             <div className="text-sm font-medium text-slate-400 uppercase tracking-wider">Overall Score</div>
@@ -109,6 +109,10 @@ export default function FocusPracticeResultPage() {
           <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 text-center">
             <div className="text-4xl font-bold text-white mb-1">{report.questionsAnswered}</div>
             <div className="text-sm font-medium text-slate-400 uppercase tracking-wider">Questions Answered</div>
+          </div>
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 text-center">
+            <div className="text-4xl font-bold text-slate-500 mb-1">{report.questionsSkipped}</div>
+            <div className="text-sm font-medium text-slate-400 uppercase tracking-wider">Questions Skipped</div>
           </div>
           <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 text-center">
             <div className="text-4xl font-bold text-white mb-1">{report.focusAreasPracticed}</div>

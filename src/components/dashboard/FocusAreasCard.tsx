@@ -7,7 +7,7 @@ export function FocusAreasCard({ focusAreas }: { focusAreas: string[] }) {
   const hasAreas = focusAreas.length > 0;
 
   return (
-    <div data-chaos-item="true" className="flex flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7 transition-all hover:border-purple-500/30">
+    <div className="flex flex-col rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7 transition-all hover:border-purple-500/30">
       <div className="mb-5 flex items-center gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-purple-500/10 text-purple-400 ring-1 ring-inset ring-purple-500/20">
           <Target className="h-5 w-5" />

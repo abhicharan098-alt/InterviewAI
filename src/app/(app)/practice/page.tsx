@@ -91,7 +91,7 @@ export default function PracticeWizard() {
   if (!resumeData) {
     return (
       <div className="min-h-screen bg-[#050814] p-6 flex flex-col items-center justify-center">
-        <div data-chaos-item="true" className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0D1424] p-8 text-center shadow-xl">
+        <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0D1424] p-8 text-center shadow-xl">
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-400/25">
             <AlertCircle className="h-7 w-7" />
           </div>
@@ -208,7 +208,7 @@ export default function PracticeWizard() {
             const active = s.num === currentStep;
             const completed = s.num < currentStep;
             return (
-              <div data-chaos-item="true" key={s.num} className="flex items-center gap-2.5">
+              <div key={s.num} className="flex items-center gap-2.5">
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
                     active
@@ -247,7 +247,7 @@ export default function PracticeWizard() {
         <div className="relative min-h-[440px] rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 sm:p-8 md:p-10 shadow-2xl flex flex-col justify-between overflow-hidden">
           {/* Generating loader overlay */}
           {generating && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050814]/90 backdrop-blur-md p-6 text-center">
+            <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] flex-col items-center justify-center bg-[#050814]/90 backdrop-blur-md p-6 text-center">
               <Sparkles className="mb-4 h-14 w-14 animate-pulse text-purple-400" />
               <h2 className="mb-2 text-2xl font-bold text-white">
                 Building Your Interview…
@@ -278,7 +278,6 @@ export default function PracticeWizard() {
                     const isSelected = role === r;
                     return (
                       <button
-                        data-chaos-item="true"
                         key={r}
                         onClick={() => setRole(r)}
                         className={`rounded-xl border p-4 text-left font-medium transition-all ${
@@ -294,7 +293,6 @@ export default function PracticeWizard() {
                 </div>
                 {role === "Other" && (
                   <input
-                    data-chaos-item="true"
                     type="text"
                     placeholder="Enter your custom job title..."
                     value={customRole}
@@ -313,7 +311,6 @@ export default function PracticeWizard() {
                   Knowing the company helps tailor the situational context of the questions.
                 </p>
                 <input
-                  data-chaos-item="true"
                   type="text"
                   placeholder="e.g., Google, Stripe, or leave blank..."
                   value={targetCompany}
@@ -324,7 +321,6 @@ export default function PracticeWizard() {
                 <div className="mt-6 flex flex-wrap gap-2">
                   {["Google", "Meta", "Amazon", "Apple", "Netflix", "Stripe"].map(company => (
                     <button
-                      data-chaos-item="true"
                       key={company}
                       onClick={() => setTargetCompany(company)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
@@ -358,7 +354,6 @@ export default function PracticeWizard() {
                     const isSelected = experienceLevel === lvl.val;
                     return (
                       <button
-                        data-chaos-item="true"
                         key={lvl.val}
                         onClick={() => setExperienceLevel(lvl.val)}
                         className={`rounded-xl border p-5 text-left transition-all ${
@@ -393,7 +388,6 @@ export default function PracticeWizard() {
                     const isSelected = interviewType === t.val;
                     return (
                       <button
-                        data-chaos-item="true"
                         key={t.val}
                         onClick={() => setInterviewType(t.val)}
                         className={`rounded-xl border p-5 text-left transition-all flex flex-col gap-1.5 ${
@@ -430,7 +424,6 @@ export default function PracticeWizard() {
                     const isSelected = difficulty === d.val;
                     return (
                       <button
-                        data-chaos-item="true"
                         key={d.val}
                         onClick={() => setDifficulty(d.val)}
                         className={`rounded-xl border p-5 text-left transition-all flex flex-col gap-1.5 ${
@@ -459,7 +452,7 @@ export default function PracticeWizard() {
                     Control how long your interview lasts.
                   </p>
                   
-                  <div data-chaos-item="true" className="mb-12">
+                  <div className="mb-12">
                     <div className="mb-4 flex items-center justify-between">
                       <label className="text-xs font-semibold uppercase tracking-wider text-purple-400">
                         Interview Duration
@@ -510,7 +503,7 @@ export default function PracticeWizard() {
                     Choose how many questions you want to answer.
                   </p>
                   
-                  <div data-chaos-item="true" className="mb-8">
+                  <div className="mb-8">
                     <div className="mb-4 flex items-center justify-between">
                       <label className="text-xs font-semibold uppercase tracking-wider text-purple-400">
                         Total Questions
@@ -554,7 +547,7 @@ export default function PracticeWizard() {
                     </div>
                   </div>
                   
-                  <div data-chaos-item="true" className="rounded-xl bg-[#0a0f1c] border border-white/[0.05] p-4 text-center">
+                  <div className="rounded-xl bg-[#0a0f1c] border border-white/[0.05] p-4 text-center">
                     <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">Estimated session pace</div>
                     <div className="text-sm font-medium text-purple-300">
                       ~{Math.round((duration / questionCount) * 10) / 10} minutes per question
@@ -580,7 +573,6 @@ export default function PracticeWizard() {
                     const isSelected = mode === m.val;
                     return (
                       <button
-                        data-chaos-item="true"
                         key={m.val}
                         onClick={() => setMode(m.val)}
                         className={`rounded-xl border p-6 text-left transition-all flex flex-col gap-2 ${
@@ -611,7 +603,7 @@ export default function PracticeWizard() {
                 </div>
 
                 {/* Configuration Summary Card */}
-                <div data-chaos-item="true" className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-6">
+                <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-6">
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 text-sm mb-6">
                     <div>
                       <span className="text-slate-500 block text-xs uppercase tracking-wider">Role</span>
@@ -645,7 +637,7 @@ export default function PracticeWizard() {
                 </div>
 
                 {/* Active Resume Context Card */}
-                <div data-chaos-item="true" className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-purple-500/20 bg-purple-900/[0.08] p-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-purple-500/20 bg-purple-900/[0.08] p-5">
                   <div className="flex items-center gap-3">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-300">
                       <FileText className="h-5 w-5" />

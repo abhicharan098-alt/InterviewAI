@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export function PreparationMomentum({ completed }: { completed: number }) {
   return (
-    <div data-chaos-item="true" className="flex flex-col w-full rounded-2xl border border-orange-500/20 bg-gradient-to-br from-orange-500/10 via-[#0D1424] to-transparent p-5 shadow-xl shadow-black/20">
+    <div className="flex flex-col w-full rounded-2xl border border-orange-500/20 bg-gradient-to-br from-orange-500/10 via-[#0D1424] to-transparent p-5 shadow-xl shadow-black/20">
       <div className="flex items-center gap-3 mb-3">
         <div className="grid h-8 w-8 place-items-center rounded-lg bg-orange-500/20">
           <Flame className="h-4 w-4 text-orange-400" />

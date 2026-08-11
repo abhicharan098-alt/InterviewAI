@@ -9,7 +9,7 @@ export function PreparationCard({
   readinessScore: number;
 }) {
   return (
-    <div data-chaos-item="true" className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 h-full">
+    <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 h-full">
       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-purple-600/15 blur-[80px]" />
       
       <div className="relative z-10 flex flex-col min-w-0">

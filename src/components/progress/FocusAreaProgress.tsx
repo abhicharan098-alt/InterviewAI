@@ -54,7 +54,7 @@ export function FocusAreaProgress({ focusAreasData }: { focusAreasData: FocusAre
         </Link>
       </div>
 
-      <div data-chaos-item="true" className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-7">
         {allEmpty ? (
           <div className="flex flex-col items-center justify-center py-6 text-center">
             <BarChart3 className="mx-auto mb-3 h-8 w-8 text-slate-500" />

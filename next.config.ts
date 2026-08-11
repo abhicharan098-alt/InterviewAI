@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "purchase-accuracy-schools-yet.trycloudflare.com",
     "*.trycloudflare.com",
+    "*.ngrok-free.dev",
+    "*.ngrok.app",
   ],
   async redirects() {
     return [

@@ -67,7 +67,7 @@ export default function FocusPracticeSetupPage() {
       <Reveal className="w-full max-w-xl">
         <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-8 shadow-2xl relative overflow-hidden">
           {starting && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050814]/90 backdrop-blur-md p-6 text-center">
+            <div className="fixed top-0 left-0 z-[9999] flex h-[100dvh] w-[100vw] flex-col items-center justify-center bg-[#050814]/90 backdrop-blur-md p-6 text-center">
               <Loader2 className="mb-4 h-12 w-12 animate-spin text-purple-400" />
               <h2 className="mb-2 text-xl font-bold text-white">
                 Preparing Focus Practice...

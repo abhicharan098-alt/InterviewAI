@@ -75,7 +75,6 @@ export function StatCard({
 
   return (
     <div
-      data-chaos-item="true"
       ref={ref}
       className="flex h-full flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-500/30"
     >

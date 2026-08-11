@@ -20,6 +20,7 @@ import { CoachDashboardCard } from "@/components/dashboard/CoachDashboardCard";
 import { PreparationMomentum } from "@/components/dashboard/PreparationMomentum";
 import { QuickDrill } from "@/components/dashboard/QuickDrill";
 import { DailyStreak } from "@/components/dashboard/DailyStreak";
+import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
 type RecentInterview = {
   id: string;
   role: string;
@@ -95,9 +96,17 @@ export default async function DashboardPage() {
             },
           }),
           prisma.interview.findMany({
-            where: { userId, status: "COMPLETED", report: { isNot: null } },
+            where: { 
+              userId, 
+              status: "COMPLETED", 
+              report: { isNot: null },
+              completedAt: {
+                gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+              }
+            },
             select: {
               createdAt: true,
+              completedAt: true,
               role: true,
               report: {
                 select: {
@@ -111,6 +120,7 @@ export default async function DashboardPage() {
               },
             },
             orderBy: { completedAt: "desc" },
+            take: 50
           }),
           prisma.interview.findMany({
             where: { userId },
@@ -132,10 +142,10 @@ export default async function DashboardPage() {
     const scores = reports.map((r) => r.overallScore);
 
     const chartData = reportRows.map((r) => ({
-      date: r.createdAt.toISOString(),
+      date: (r.completedAt ?? r.createdAt).toISOString(),
       score: r.report?.overallScore || 0,
       role: r.role
-    })).slice(0, 10);
+    }));
 
     data = {
       greetingName: firstName,
@@ -180,18 +190,12 @@ export default async function DashboardPage() {
     return <ErrorState />;
   }
 
-  const hour = new Date().getHours();
-  const greetingWord =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
         <Reveal className="shrink-0">
           <header>
-            <h1 className="text-2xl font-bold text-white">
-              {greetingWord}, {data.greetingName}
-            </h1>
+            <DashboardGreeting userName={data.greetingName} />
             <p className="mt-1 text-[15px] text-slate-400">
               Your interview preparation at a glance.
             </p>
