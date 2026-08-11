@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import fs from "fs/promises";
+import { storage } from "@/lib/storage";
 import { extractTextFromPDF } from "@/lib/parsing/pdf";
 import { extractTextFromDOCX } from "@/lib/parsing/docx";
 import { parseResumeWithAI } from "@/lib/ai/AIResumeParser";
@@ -39,7 +39,10 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
 
     try {
       console.log("[RESUME] Starting PDF Extraction");
-      const buffer = await fs.readFile(resume.fileUrl);
+      // Read the file back from the active storage backend (cloud object
+      // storage on Vercel, local disk in development). Never touches a
+      // server-local file path on Vercel, where the filesystem is read-only.
+      const buffer = await storage.readFile(resume.fileUrl);
 
       if (resume.fileType === "application/pdf") {
         rawText = await extractTextFromPDF(buffer);

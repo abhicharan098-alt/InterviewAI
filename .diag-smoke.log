@@ -1,0 +1,18 @@
+
+> cabelochave@0.1.0 dev
+> next dev -p 3125
+
+▲ Next.js 16.2.12 (Turbopack)
+- Local:         http://localhost:3125
+- Network:       http://192.168.1.3:3125
+- Environments: .env
+✓ Ready in 789ms
+
+[STORAGE][BLOB] provider created: tokenPresent=false, storeIdPresent=false
+[STORAGE] provider selected: LocalStorageProvider (local development)
+[RESUME][LOG] upload route module loaded
+[RESUME][0/8] REQUEST begin: contentLength=0
+[RESUME][1/8] STEP_AUTH begin
+[RESUME][1/8] STEP_AUTH done: hasSession=false
+ POST /api/resume/upload 401 in 473ms (next.js: 409ms, application-code: 64ms)
+[?25h
