@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest, NextFetchEvent } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export default async function middleware(request: NextRequest, event: NextFetchEvent) {
+export default async function proxy(request: NextRequest, event: NextFetchEvent) {
   if (request.nextUrl.pathname.toLowerCase() === "/interviewai") {
     return NextResponse.redirect(new URL("/", request.url));
   }
