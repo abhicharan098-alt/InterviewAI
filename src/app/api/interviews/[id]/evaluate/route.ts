@@ -79,22 +79,37 @@ export async function POST(
         );
 
         if (isDuplicate) {
-          evaluationData = await prisma.interviewEvaluation.create({
-            data: {
-              answerId: q.answer.id,
-              technicalScore: 0,
-              communicationScore: 0,
-              clarityScore: 0,
-              confidenceScore: 0,
-              relevanceScore: 0,
-              grammarScore: 0,
-              overallScore: 0,
-              strengths: ["None."],
-              weaknesses: ["The answer provided was completely irrelevant or addressed a different question entirely."],
-              suggestions: ["Ensure you are listening to the specific question asked and responding directly to it, rather than reusing previous answers."],
-              idealAnswer: "N/A - Answer was a duplicate.",
+          try {
+            evaluationData = await prisma.interviewEvaluation.create({
+              data: {
+                answerId: q.answer.id,
+                technicalScore: 0,
+                communicationScore: 0,
+                clarityScore: 0,
+                confidenceScore: 0,
+                relevanceScore: 0,
+                grammarScore: 0,
+                overallScore: 0,
+                strengths: ["None."],
+                weaknesses: ["The answer provided was completely irrelevant or addressed a different question entirely."],
+                suggestions: ["Ensure you are listening to the specific question asked and responding directly to it, rather than reusing previous answers."],
+                idealAnswer: "N/A - Answer was a duplicate.",
+              }
+            });
+          } catch (createError: any) {
+            if (createError instanceof Prisma.PrismaClientKnownRequestError && createError.code === 'P2002') {
+              const reFetched = await prisma.interviewEvaluation.findUnique({
+                where: { answerId: q.answer.id }
+              });
+              if (reFetched) {
+                evaluationData = reFetched;
+              } else {
+                throw createError;
+              }
+            } else {
+              throw createError;
             }
-          });
+          }
         } else {
           const result = await evaluateAnswer({
           role: interview.role,
