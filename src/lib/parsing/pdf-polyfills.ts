@@ -1,20 +1,28 @@
 /**
- * Node polyfill for the browser-only `DOMMatrix` global.
+ * Node polyfills for the browser-only `DOMMatrix` and `Path2D` globals that
+ * pdfjs-dist's legacy Node build requires.
  *
  * pdfjs-dist's legacy Node build (`pdf.mjs`) contains the canvas-rendering
- * module, which executes `const SCALE_MATRIX = new DOMMatrix();` at module
- * instantiation (top-level). In browsers `DOMMatrix` is a native global, but
- * on Node it only becomes defined when pdf.js's own `node_utils` can load its
- * optional native dependency `@napi-rs/canvas`. That package is never present
- * inside the Vercel serverless bundle, so importing pdfjs-dist throws
- * `ReferenceError: DOMMatrix is not defined` before any text is extracted.
+ * module. At module instantiation it executes `const SCALE_MATRIX = new
+ * DOMMatrix();` (top-level) and its `node_utils` module checks for `Path2D`,
+ * warning "Cannot polyfill 'Path2D', rendering may be broken." when it is
+ * missing. In browsers both are native globals, but on Node they only become
+ * defined when pdf.js's own `node_utils` can load its optional native
+ * dependency `@napi-rs/canvas`. That package is never present inside the
+ * Vercel serverless bundle, so without polyfills importing pdfjs-dist either
+ * throws `ReferenceError: DOMMatrix is not defined` or warns about Path2D
+ * before any text is extracted.
  *
- * This module installs a small, spec-compliant 2D affine DOMMatrix on
- * `globalThis` BEFORE pdfjs-dist is imported. pdf.js's `node_utils` sees it is
- * already present and skips its own (canvas-based) polyfill, so the legacy
- * build loads cleanly on the Node serverless runtime and text extraction
- * works. It is only a polyfill for an API the chosen parser requires at
- * module-load time; the parser itself is unchanged.
+ * This module installs small, spec-compliant 2D affine DOMMatrix and Path2D
+ * implementations on `globalThis` BEFORE pdfjs-dist is imported. pdf.js's
+ * `node_utils` sees they are already present and skips its own (canvas-based)
+ * polyfill, so the legacy build loads cleanly on the Node serverless runtime.
+ * The application only performs TEXT EXTRACTION (`getTextContent()`); pdf.js
+ * constructs `Path2D` objects exclusively inside its canvas RENDERING path
+ * (`page.render()`), which is never invoked here, so these polyfills are never
+ * exercised by the parser. They are still real, functional implementations
+ * (not no-op fakes) in case any code path ever uses them. The parser itself
+ * is unchanged.
  */
 
 class PDFDOMMatrix {
@@ -170,4 +178,200 @@ class PDFDOMMatrix {
 
 if (typeof globalThis.DOMMatrix === "undefined") {
   globalThis.DOMMatrix = PDFDOMMatrix as unknown as typeof DOMMatrix;
+}
+
+/**
+ * Spec-compliant `Path2D` implementation backed by SVG path data. pdf.js's
+ * `node_utils` only probes for the existence of `globalThis.Path2D` (its
+ * native/canvas implementations are otherwise used for rendering, which this
+ * app never performs), so this polyfill exists to satisfy that module-load
+ * check while remaining a genuine, functional path object.
+ */
+class PDFPath2D {
+  private _pathData = "";
+
+  constructor(init?: string | PDFPath2D) {
+    if (init instanceof PDFPath2D) {
+      this._pathData = init._pathData;
+      return;
+    }
+    if (typeof init === "string") {
+      if (init.trim() === "") {
+        throw new TypeError(
+          "Failed to construct 'Path2D': The provided string is not a valid path."
+        );
+      }
+      this._pathData = init.trim();
+      return;
+    }
+    if (init != null) {
+      throw new TypeError(
+        "Failed to construct 'Path2D': The provided value is not a string or Path2D."
+      );
+    }
+  }
+
+  private _num(value: number): string {
+    if (!Number.isFinite(value)) {
+      throw new TypeError("Failed to execute 'Path2D' command: coordinate must be finite.");
+    }
+    return String(value);
+  }
+
+  addPath(path: PDFPath2D, transform?: { a: number; b: number; c: number; d: number; e: number; f: number }): void {
+    if (!(path instanceof PDFPath2D)) {
+      throw new TypeError(
+        "Failed to execute 'addPath' on 'Path2D': The provided value is not a Path2D object."
+      );
+    }
+    if (!transform || (transform.a === 1 && transform.b === 0 && transform.c === 0 && transform.d === 1 && transform.e === 0 && transform.f === 0)) {
+      this._pathData += path._pathData;
+      return;
+    }
+    if (/[Aa]/i.test(path._pathData)) {
+      throw new TypeError(
+        "Failed to execute 'addPath' on 'Path2D': Transformed elliptical arc commands are not supported by this polyfill."
+      );
+    }
+    const { a, b, c, d, e, f } = transform;
+    const tokens = path._pathData.match(/-?\d*\.?\d+(?:[eE][+-]?\d+)?/g) ?? [];
+    let index = 0;
+    const transformed = path._pathData.replace(/-?\d*\.?\d+(?:[eE][+-]?\d+)?/g, () => {
+      const x = parseFloat(tokens[index]!);
+      const y = parseFloat(tokens[index + 1]!);
+      index += 2;
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return tokens[index - 1]!;
+      return `${this._num(a * x + c * y + e)},${this._num(b * x + d * y + f)}`;
+    });
+    this._pathData += transformed;
+  }
+
+  closePath(): void {
+    this._pathData += "Z";
+  }
+
+  moveTo(x: number, y: number): void {
+    this._pathData += `M${this._num(x)},${this._num(y)}`;
+  }
+
+  lineTo(x: number, y: number): void {
+    this._pathData += `L${this._num(x)},${this._num(y)}`;
+  }
+
+  bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void {
+    this._pathData += `C${this._num(cp1x)},${this._num(cp1y)} ${this._num(cp2x)},${this._num(cp2y)} ${this._num(x)},${this._num(y)}`;
+  }
+
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void {
+    this._pathData += `Q${this._num(cpx)},${this._num(cpy)} ${this._num(x)},${this._num(y)}`;
+  }
+
+  rect(x: number, y: number, w: number, h: number): void {
+    this._pathData += `M${this._num(x)},${this._num(y)} h${this._num(w)} v${this._num(h)} h${this._num(-w)} Z`;
+  }
+
+  roundRect(x: number, y: number, w: number, h: number, radii?: number | number[]): void {
+    const r0 = Array.isArray(radii) ? radii[0] ?? 0 : radii ?? 0;
+    const r = Math.min(Math.abs(r0), Math.abs(w) / 2, Math.abs(h) / 2);
+    this._pathData +=
+      `M${this._num(x + r)},${this._num(y)}` +
+      ` h${this._num(w - 2 * r)}` +
+      this._arc(x + w - r, y + r, r, r, -Math.PI / 2, 0, false) +
+      ` v${this._num(h - 2 * r)}` +
+      this._arc(x + w - r, y + h - r, r, r, 0, Math.PI / 2, false) +
+      ` h${this._num(-(w - 2 * r))}` +
+      this._arc(x + r, y + h - r, r, r, Math.PI / 2, Math.PI, false) +
+      ` v${this._num(-(h - 2 * r))}` +
+      this._arc(x + r, y + r, r, r, Math.PI, Math.PI * 1.5, false) +
+      "Z";
+  }
+
+  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
+    if (radius < 0) {
+      throw new RangeError("Failed to execute 'arc' on 'Path2D': The radius provided is negative.");
+    }
+    const fullCircle = Math.abs(endAngle - startAngle) >= Math.PI * 2;
+    if (fullCircle) {
+      const half = startAngle + Math.PI;
+      this._arc(x, y, radius, radius, startAngle, half, !!counterclockwise);
+      this._arc(x, y, radius, radius, half, endAngle, !!counterclockwise);
+      return;
+    }
+    this._arc(x, y, radius, radius, startAngle, endAngle, !!counterclockwise);
+  }
+
+  arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void {
+    if (radius < 0) {
+      throw new RangeError("Failed to execute 'arcTo' on 'Path2D': The radius provided is negative.");
+    }
+    const [x0, y0] = this._lastPoint();
+    const x01 = x0 - x1;
+    const y01 = y0 - y1;
+    const x21 = x2 - x1;
+    const y21 = y2 - y1;
+    const l01 = Math.hypot(x01, y01);
+    const l21 = Math.hypot(x21, y21);
+    if (l01 === 0 || l21 === 0 || radius === 0) {
+      this.lineTo(x1, y1);
+      return;
+    }
+    const angle = Math.atan2(y21, x21) - Math.atan2(y01, x01);
+    const lambda = Math.atan2(Math.abs(Math.sin(angle)), Math.abs(Math.cos(angle)));
+    const d0 = Math.sign(Math.sin(angle)) * lambda;
+    const d1 = Math.abs(d0) < Math.PI / 2 ? radius / Math.tan(d0 / 2) : radius * Math.tan(d0 / 2);
+    const d2 = radius / Math.sin(d0);
+    const cx = x1 + (d1 / l01) * x01;
+    const cy = y1 + (d1 / l01) * y01;
+    const p0x = x1 + (d2 / l01) * x01;
+    const p0y = y1 + (d2 / l01) * y01;
+    const p2x = x1 + (d2 / l21) * x21;
+    const p2y = y1 + (d2 / l21) * y21;
+    const sweep = d0 > 0;
+    this.lineTo(p0x, p0y);
+    this._arc(cx, cy, radius, radius, Math.atan2(p0y - cy, p0x - cx), Math.atan2(p2y - cy, p2x - cx), sweep);
+    this.lineTo(x2, y2);
+  }
+
+  ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): void {
+    if (radiusX < 0 || radiusY < 0) {
+      throw new RangeError("Failed to execute 'ellipse' on 'Path2D': A radius provided is negative.");
+    }
+    const fullCircle = Math.abs(endAngle - startAngle) >= Math.PI * 2;
+    if (fullCircle) {
+      const half = startAngle + Math.PI;
+      this._arc(x, y, radiusX, radiusY, startAngle, half, !!counterclockwise, rotation);
+      this._arc(x, y, radiusX, radiusY, half, endAngle, !!counterclockwise, rotation);
+      return;
+    }
+    this._arc(x, y, radiusX, radiusY, startAngle, endAngle, !!counterclockwise, rotation);
+  }
+
+  private _arc(x: number, y: number, rx: number, ry: number, startAngle: number, endAngle: number, counterclockwise: boolean, rotation = 0): string {
+    const sweep = counterclockwise ? 0 : 1;
+    const largeArc = Math.abs(endAngle - startAngle) > Math.PI ? 1 : 0;
+    const startX = x + rx * Math.cos(startAngle);
+    const startY = y + ry * Math.sin(startAngle);
+    const endX = x + rx * Math.cos(endAngle);
+    const endY = y + ry * Math.sin(endAngle);
+    let out = "";
+    if (this._pathData === "" || /Z$/.test(this._pathData)) {
+      out += `M${this._num(startX)},${this._num(startY)}`;
+    }
+    out += `A${this._num(rx)},${this._num(ry)} ${this._num(rotation)} ${largeArc} ${sweep} ${this._num(endX)},${this._num(endY)}`;
+    return out;
+  }
+
+  private _lastPoint(): [number, number] {
+    const tokens = this._pathData.match(/-?\d*\.?\d+(?:[eE][+-]?\d+)?/g);
+    if (tokens && tokens.length >= 2) {
+      const x = parseFloat(tokens[tokens.length - 2]!);
+      const y = parseFloat(tokens[tokens.length - 1]!);
+      if (Number.isFinite(x) && Number.isFinite(y)) return [x, y];
+    }
+    return [0, 0];
+  }
+}
+
+if (typeof globalThis.Path2D === "undefined") {
+  globalThis.Path2D = PDFPath2D as unknown as typeof Path2D;
 }

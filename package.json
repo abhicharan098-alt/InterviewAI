@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",
@@ -22,6 +23,7 @@
     "mammoth": "^1.12.0",
     "next": "16.2.12",
     "next-auth": "^4.24.15",
+    "patch-package": "^8.0.0",
     "pdfjs-dist": "^6.2.108",
     "postcss": "^8.5.26",
     "prisma": "^5.14.0",

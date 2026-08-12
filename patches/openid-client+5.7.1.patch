@@ -1,0 +1,36 @@
+diff --git a/node_modules/openid-client/lib/client.js b/node_modules/openid-client/lib/client.js
+index 12b72e9..cdb9a09 100644
+--- a/node_modules/openid-client/lib/client.js
++++ b/node_modules/openid-client/lib/client.js
+@@ -64,7 +64,7 @@ function authorizationHeaderValue(token, tokenType = 'Bearer') {
+ }
+ 
+ function getSearchParams(input) {
+-  const parsed = url.parse(input);
++  const parsed = new URL(input, 'https://a.b');
+   if (!parsed.search) return {};
+   return querystring.parse(parsed.search.substring(1));
+ }
+diff --git a/node_modules/openid-client/lib/issuer.js b/node_modules/openid-client/lib/issuer.js
+index 906e6a5..81a113f 100644
+--- a/node_modules/openid-client/lib/issuer.js
++++ b/node_modules/openid-client/lib/issuer.js
+@@ -175,7 +175,7 @@ class Issuer {
+ }
+ 
+ function resolveWellKnownUri(uri) {
+-  const parsed = url.parse(uri);
++  const parsed = new URL(uri);
+   if (parsed.pathname.includes('/.well-known/')) {
+     return uri;
+   } else {
+@@ -185,7 +185,8 @@ function resolveWellKnownUri(uri) {
+     } else {
+       pathname = `${parsed.pathname}/.well-known/openid-configuration`;
+     }
+-    return url.format({ ...parsed, pathname });
++    parsed.pathname = pathname;
++    return parsed.toString();
+   }
+ }
+ 
