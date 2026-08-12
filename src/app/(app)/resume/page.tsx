@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   UploadCloud, FileText, CheckCircle2, AlertCircle,
   Loader2, X, Edit2, Save, Trash2
@@ -125,6 +125,14 @@ export default function ResumePage() {
   const [editForm, setEditForm] = useState<any>({});
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Ids deleted in this page session. Any fetch/poll response that still
+  // contains one of them is stale (it was computed before the DELETE
+  // committed) and must never be put back into state.
+  const deletedIdsRef = useRef<Set<string>>(new Set());
+  // Prevents a double-click on "Yes, Delete" from firing two DELETE requests
+  // for the same resume (observed in production: 200 then a 404).
+  const deletingRef = useRef(false);
+
   const activeResume = resumes[0];
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -136,7 +144,14 @@ export default function ResumePage() {
     try {
       const res = await fetch("/api/resume");
       const data = await readJsonOrThrow(res);
-      if (res.ok) setResumes(data.resumes);
+      if (res.ok) {
+        // Drop resumes deleted during this session so a stale GET (one that
+        // started before a DELETE committed) cannot restore a deleted card —
+        // including one that a late parse marked as FAILED.
+        setResumes(
+          (data.resumes || []).filter((r: any) => !deletedIdsRef.current.has(r.id))
+        );
+      }
     } catch {
       console.error("Failed to fetch resumes");
     } finally {
@@ -195,12 +210,19 @@ export default function ResumePage() {
   };
 
   const handleDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteId || deletingRef.current) return;
+    deletingRef.current = true;
     try {
       const res = await fetch(`/api/resume/${deleteId}`, { method: "DELETE" });
       const data = await readJsonOrThrow(res);
       if (res.ok) {
+        // Remove from every relevant state so the card, its parsed profile,
+        // and the edit form all disappear immediately. Remember the id so a
+        // stale refetch can never bring it back (or flip it to FAILED).
+        deletedIdsRef.current.add(deleteId);
         setResumes((prev) => prev.filter((r) => r.id !== deleteId));
+        setEditing(false);
+        setEditForm({});
         showToast("success", "Resume deleted successfully.");
       } else {
         throw new Error(data.message || "Failed to delete");
@@ -208,6 +230,7 @@ export default function ResumePage() {
     } catch (err: any) {
       showToast("error", err.message || "Could not delete. Please try again.");
     } finally {
+      deletingRef.current = false;
       setDeleteId(null);
     }
   };
