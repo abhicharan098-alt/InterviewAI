@@ -42,6 +42,36 @@ function Toast({
   );
 }
 
+/* ─── safe JSON response parsing ─── */
+// The resume APIs return JSON, but a Vercel function that times out (or a
+// Next.js error page) comes back as HTML. Reading the body as text first lets
+// us surface the REAL backend error instead of crashing with
+// "Unexpected token '<' ... is not valid JSON" from response.json().
+async function readJsonOrThrow(res: Response): Promise<any> {
+  const contentType = res.headers.get("content-type") ?? "";
+  const body = await res.text();
+
+  if (/json/i.test(contentType)) {
+    try {
+      return JSON.parse(body);
+    } catch {
+      // Not actually valid JSON — fall through and report the raw text.
+    }
+  }
+
+  const readable = body
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 400);
+  const reason = readable || res.statusText || "Request failed";
+  // Surface the REAL backend failure (status + response text) instead of a
+  // generic "Unexpected token '<' ... is not valid JSON" JSON.parse crash.
+  const err = new Error(`${reason} (HTTP ${res.status})`) as Error & { status: number };
+  err.status = res.status;
+  throw err;
+}
+
 /* ─── delete confirmation modal ─── */
 function DeleteConfirmModal({
   onConfirm,
@@ -105,7 +135,7 @@ export default function ResumePage() {
   const fetchResumes = useCallback(async () => {
     try {
       const res = await fetch("/api/resume");
-      const data = await res.json();
+      const data = await readJsonOrThrow(res);
       if (res.ok) setResumes(data.resumes);
     } catch {
       console.error("Failed to fetch resumes");
@@ -142,7 +172,7 @@ export default function ResumePage() {
 
     try {
       const uploadRes = await fetch("/api/resume/upload", { method: "POST", body: formData });
-      const uploadData = await uploadRes.json();
+      const uploadData = await readJsonOrThrow(uploadRes);
       if (!uploadRes.ok) throw new Error(uploadData.message || "Upload failed");
 
       setResumes([uploadData.resume, ...resumes]);
@@ -150,7 +180,7 @@ export default function ResumePage() {
       setParsing(true);
 
       const parseRes = await fetch(`/api/resume/${uploadData.resume.id}/parse`, { method: "POST" });
-      const parseData = await parseRes.json();
+      const parseData = await readJsonOrThrow(parseRes);
       if (!parseRes.ok) throw new Error(parseData.message || "Parsing failed");
 
       showToast("success", "Resume uploaded and parsed successfully!");
@@ -168,11 +198,12 @@ export default function ResumePage() {
     if (!deleteId) return;
     try {
       const res = await fetch(`/api/resume/${deleteId}`, { method: "DELETE" });
+      const data = await readJsonOrThrow(res);
       if (res.ok) {
         setResumes((prev) => prev.filter((r) => r.id !== deleteId));
         showToast("success", "Resume deleted successfully.");
       } else {
-        throw new Error("Failed to delete");
+        throw new Error(data.message || "Failed to delete");
       }
     } catch (err: any) {
       showToast("error", err.message || "Could not delete. Please try again.");
@@ -188,12 +219,13 @@ export default function ResumePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editForm),
       });
+      const data = await readJsonOrThrow(res);
       if (res.ok) {
         showToast("success", "Changes saved successfully.");
         setEditing(false);
         fetchResumes();
       } else {
-        throw new Error("Failed to save changes");
+        throw new Error(data.message || "Failed to save changes");
       }
     } catch (err: any) {
       showToast("error", err.message || "Could not save. Please try again.");

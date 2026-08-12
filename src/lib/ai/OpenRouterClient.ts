@@ -41,6 +41,9 @@ export async function generateText(options: GenerateTextOptions): Promise<string
           max_tokens: options.maxTokens,
           response_format: options.responseFormat,
         }),
+        // Bound each attempt so an unresponsive upstream cannot hang a
+        // serverless function until it is killed by its duration limit.
+        signal: AbortSignal.timeout(60_000),
       });
 
       if (!response.ok) {

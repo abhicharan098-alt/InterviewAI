@@ -33,6 +33,19 @@ import Link from "next/link";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
+// Resume APIs return JSON, but a Vercel/Next error page (timeout, 5xx, …)
+// comes back as HTML. Reading the body as text first keeps the wizard from
+// crashing with "Unexpected token '<' ... is not valid JSON" and lets the
+// catch handler fall back gracefully instead.
+async function safeJson(res: Response): Promise<any> {
+  const body = await res.text();
+  try {
+    return JSON.parse(body);
+  } catch {
+    return null;
+  }
+}
+
 export default function PracticeWizard() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>(1);
@@ -54,8 +67,8 @@ export default function PracticeWizard() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/resume").then((res) => res.json()),
-      fetch("/api/profile").then((res) => res.json()),
+      fetch("/api/resume").then((res) => safeJson(res)),
+      fetch("/api/profile").then((res) => safeJson(res)),
     ])
       .then(([resumeRes, profileRes]) => {
         const active = resumeRes.resumes?.find(

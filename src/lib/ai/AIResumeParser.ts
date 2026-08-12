@@ -107,6 +107,14 @@ ${rawText}
     }
   } catch (error) {
     console.error("AI Parsing Error:", error);
-    throw new Error("Failed to parse resume with AI.");
+    // Preserve the REAL upstream error (invalid API key, rate limit, bad model,
+    // malformed AI output, ...) instead of replacing it with a generic message.
+    // The parse API route slices this to a safe length before returning it to
+    // the client, so the user sees the actual failure reason in the UI.
+    const message =
+      error instanceof Error && error.message.trim()
+        ? error.message
+        : "Failed to parse resume with AI.";
+    throw new Error(message);
   }
 }

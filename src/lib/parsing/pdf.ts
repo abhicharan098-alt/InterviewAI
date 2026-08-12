@@ -1,4 +1,14 @@
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+// Importing the worker module registers `globalThis.pdfjsWorker` (a top-level
+// side effect of pdf.worker.mjs). pdfjs then re-uses that in-process
+// "main thread worker" and NEVER runs the dynamic `import("./pdf.worker.mjs")`
+// that its fake-worker fallback uses. That dynamic import is annotated
+// webpackIgnore/vite-ignore and therefore left verbatim by the bundler, so in
+// a Next.js production build it resolves to a module that does not exist on
+// disk and every extraction fails with:
+//   Setting up fake worker failed: "Cannot find module '...pdf.worker.mjs'".
+// Keeping the parser (pdfjs-dist) unchanged; this only fixes worker loading.
+import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   // pdf2json's bundled pdf.js fork cannot parse XRef-stream / ReportLab
