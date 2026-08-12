@@ -4,41 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  LayoutDashboard,
-  FileText,
-  Sparkles,
-  Activity,
-  TrendingUp,
-  User,
-  Settings,
   LogOut,
   BrainCircuit,
-  Target,
-  Bell,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-type NavItem = { name: string; href: string; icon: LucideIcon };
-
-const navItems: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Focus Areas", href: "/focus-areas", icon: Target },
-  { name: "Resume", href: "/resume", icon: FileText },
-  { name: "Practice", href: "/practice", icon: Sparkles },
-  { name: "Interviews", href: "/interviews", icon: Activity },
-  { name: "Progress", href: "/progress", icon: TrendingUp },
-];
-
-const bottomNavItems: NavItem[] = [
-  { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Profile", href: "/profile", icon: User },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
+import {
+  navItems,
+  secondaryNavItems as bottomNavItems,
+  isNavActive,
+} from "@/components/layout/navigation";
 
 export function Sidebar({ collapsed = true }: { collapsed?: boolean }) {
   const pathname = usePathname();
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => isNavActive(pathname, href);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/login" });

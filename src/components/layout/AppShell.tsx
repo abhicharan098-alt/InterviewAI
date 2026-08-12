@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { TopBar } from "@/components/ui/TopBar";
+import { MobileNavigation } from "@/components/layout/MobileNavigation";
 import React from "react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -35,12 +36,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex flex-1 flex-col md:ml-[72px]">
         <TopBar />
-        <main className="flex-1 overflow-x-hidden p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-x-hidden p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 lg:pb-8 lg:p-8">
           <div className="mx-auto w-full max-w-7xl">
             {children}
           </div>
         </main>
       </div>
+      <MobileNavigation />
     </div>
   );
 }
