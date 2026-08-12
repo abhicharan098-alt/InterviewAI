@@ -1,3 +1,11 @@
+// MUST be imported before pdfjs-dist: pdfjs's legacy build (pdf.mjs) executes
+// `const SCALE_MATRIX = new DOMMatrix();` at module instantiation, and on the
+// Node serverless runtime DOMMatrix only exists if this polyfill installs it
+// (pdf.js's own polyfill requires the optional native dep @napi-rs/canvas,
+// which is not present in the Vercel bundle — without this import every
+// extraction crashes with `ReferenceError: DOMMatrix is not defined`).
+import "./pdf-polyfills";
+
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 // Importing the worker module registers `globalThis.pdfjsWorker` (a top-level
 // side effect of pdf.worker.mjs). pdfjs then re-uses that in-process
@@ -13,9 +21,10 @@ import "pdfjs-dist/legacy/build/pdf.worker.mjs";
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   // pdf2json's bundled pdf.js fork cannot parse XRef-stream / ReportLab
   // resumes ("Invalid XRef stream header"), so we extract text with the
-  // Node-compatible legacy build of pdf.js (pdfjs-dist) instead. The legacy
-  // build includes the DOMMatrix/polyfill shims that are missing on the
-  // serverless Node runtime and needs no separate worker file.
+  // Node-compatible legacy build of pdf.js (pdfjs-dist) instead. Its only
+  // serverless-runtime gap — the top-level `new DOMMatrix()` in the bundled
+  // canvas module — is covered by the pdf-polyfills import above, which makes
+  // this build run without browser globals or the @napi-rs/canvas addon.
   const data = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   // verbosity: 0 (errors only) silences pdf.js warnings about standard fonts
   // (e.g. "Ensure that the standardFontDataUrl API parameter is provided"),
