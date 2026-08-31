@@ -3,6 +3,7 @@ import "./globals.css";
 import { StoreProvider } from "@/context/StoreContext";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { GlobalIntro } from "@/components/layout/GlobalIntro";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "InterviewAI | AI-Powered Interview Preparation Platform",
@@ -38,6 +39,7 @@ export default function RootLayout({
             </GlobalIntro>
           </StoreProvider>
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
