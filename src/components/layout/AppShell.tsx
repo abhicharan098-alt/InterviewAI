@@ -23,8 +23,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isDistractionFree) {
     return (
-      <div className="flex min-h-[100dvh] w-full flex-col overflow-hidden bg-[#050814]">
-        <main className="flex-1 w-full mx-auto overflow-y-auto">
+      <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-[#050814]">
+        <main className="min-h-0 flex-1 w-full mx-auto overflow-y-auto">
           {children}
         </main>
       </div>

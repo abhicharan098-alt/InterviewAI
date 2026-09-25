@@ -42,3 +42,13 @@ next-env.d.ts
 
 # local file storage (user-uploaded resumes etc.)
 /storage/
+
+# local dev/log artifacts
+/.diag-smoke.log
+/dev_logs.txt
+/dev_server.log
+/.local/logs/
+/scripts/tsc-final.txt
+
+.vercel
+.env*

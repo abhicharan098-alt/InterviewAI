@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { InterviewPauseModal } from "@/components/interviews/InterviewPauseModal";
+import { ActiveWorkspace } from "@/components/interviews/ActiveWorkspace";
 
 /* ─── Web Speech API types ─── */
 interface ISpeechRecognition extends EventTarget {
@@ -155,7 +156,7 @@ function VoicePanel({
 
   if (!supported) {
     return (
-      <div className="flex flex-grow flex-col items-center justify-center gap-4 p-6 text-center">
+      <div className="flex flex-grow min-h-0 flex-col items-center justify-center gap-4 p-6 text-center">
         <MicOff className="h-10 w-10 text-slate-500" />
         <p className="text-sm text-slate-400">
           Voice input is not supported in this browser.
@@ -182,22 +183,22 @@ function VoicePanel({
     : { label: "Ready to Record", cls: "bg-purple-500/15 text-purple-300 ring-purple-400/30" };
 
   return (
-    <div className="flex flex-grow flex-col gap-4 p-6">
-      <div className="flex flex-col items-center gap-6 py-6">
+    <div className="flex flex-grow flex-col gap-4 p-4 min-h-0 sm:p-6">
+      <div className="flex flex-col items-center gap-4 py-4 shrink-0 sm:gap-6 sm:py-6">
         <button
           onClick={toggleListening}
           disabled={isSubmitting}
           aria-label={listening ? "Stop recording voice" : "Start recording voice"}
-          className={`relative flex h-24 w-24 items-center justify-center rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${
+          className={`relative flex h-20 w-20 items-center justify-center rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 sm:h-24 sm:w-24 ${
             listening
               ? "bg-red-500 shadow-[0_0_0_16px_rgba(239,68,68,0.15)] hover:bg-red-600"
               : "bg-gradient-to-br from-purple-600 to-violet-600 shadow-lg shadow-purple-950/40 hover:brightness-110"
           }`}
         >
           {listening ? (
-            <MicOff className="h-10 w-10 text-white" />
+            <MicOff className="h-8 w-8 text-white sm:h-10 sm:w-10" />
           ) : (
-            <Mic className="h-10 w-10 text-white" />
+            <Mic className="h-8 w-8 text-white sm:h-10 sm:w-10" />
           )}
         </button>
         <span className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-inset ${stateBadge.cls}`}>
@@ -206,7 +207,7 @@ function VoicePanel({
         </span>
       </div>
 
-      <div className="flex-grow rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-inner">
+      <div className="flex-grow min-h-0 overflow-y-auto rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-inner">
         <p className="min-h-[100px] break-words text-[15px] leading-relaxed text-white">
           {answerText || <span className="text-slate-600 italic">Your spoken answer will appear here…</span>}
           {interim && <span className="text-slate-400"> {interim}</span>}
@@ -214,7 +215,7 @@ function VoicePanel({
       </div>
 
       {answerText && (
-        <div className="mt-2">
+        <div className="mt-2 shrink-0">
           <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
             Edit Transcript
           </label>
@@ -222,7 +223,7 @@ function VoicePanel({
             value={answerText}
             onChange={(e) => setAnswerText(e.target.value)}
             disabled={isSubmitting}
-            className="w-full min-h-[100px] rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-sm leading-relaxed"
+            className="w-full min-h-[100px] max-h-[25dvh] overflow-y-auto md:max-h-none rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-sm leading-relaxed"
           />
         </div>
       )}
@@ -588,11 +589,12 @@ export default function InterviewEnginePage() {
   const ttsSupported = typeof window !== "undefined" && "speechSynthesis" in window;
 
   return (
-    <div className="flex h-full p-4 md:p-8 flex-col text-white">
-      {actionError && <ErrorToast message={actionError} onClose={() => setActionError("")} />}
+    <ActiveWorkspace desktopClassName="md:pt-0 md:pb-0">
+      <div className="flex h-full w-full flex-col p-4 text-white md:p-8">
+        {actionError && <ErrorToast message={actionError} onClose={() => setActionError("")} />}
 
       {/* Top Action Bar */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex shrink-0 items-center justify-between gap-3 mb-3 md:mb-4">
         <button
           onClick={async () => {
             try {
@@ -607,11 +609,40 @@ export default function InterviewEnginePage() {
             }
             setShowReminderModal(true);
           }}
-          className="inline-flex items-center text-sm font-semibold text-slate-400 hover:text-white transition-colors"
+          className="inline-flex min-h-9 items-center text-sm font-semibold text-slate-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Pause / Exit Interview
+          Pause / Exit <span className="hidden sm:inline">&nbsp;Interview</span>
         </button>
+        <button
+          onClick={() => setShowEndDialog(true)}
+          className="md:hidden inline-flex min-h-9 items-center rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/20"
+        >
+          End <span className="hidden sm:inline">&nbsp;Interview</span>
+        </button>
+      </div>
+
+      {/* Mobile compact status bar: question number, progress, timer, session context */}
+      <div className="md:hidden mb-3 shrink-0 rounded-xl border border-white/[0.08] bg-[#0D1424] px-3 py-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="whitespace-nowrap text-xs font-semibold text-slate-300">
+            Question <span className="font-bold text-purple-300">{currentIndex + 1}</span>
+            <span className="text-slate-500">/{questionLimit}</span>
+          </span>
+          <span className="min-w-0 flex-1 truncate text-center text-[11px] text-slate-500">
+            {interview.role} · {interviewMode}
+          </span>
+          <span className={`flex items-center gap-1.5 whitespace-nowrap text-sm font-bold tabular-nums ${timeRemaining !== null && timeRemaining < 300 ? "text-red-400" : "text-white"}`}>
+            <Clock className="h-4 w-4 text-slate-500" />
+            {timeRemaining !== null ? formatTime(timeRemaining) : "--:--"}
+          </span>
+        </div>
+        <div className="mt-1.5 flex items-center gap-2">
+          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.05]">
+            <div className="h-full rounded-full bg-purple-500 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+          </div>
+          <span className="whitespace-nowrap text-[11px] font-medium text-purple-400">{Math.round(progressPercent)}%</span>
+        </div>
       </div>
 
       {/* Reminder Modal */}
@@ -684,20 +715,21 @@ export default function InterviewEnginePage() {
       )}
 
       {/* Main Workspace Grid (3 columns) */}
-      <main className="grid flex-grow grid-cols-1 gap-6 lg:grid-cols-12 min-h-0">
+      <main className="flex flex-grow flex-col gap-3 min-h-0 md:grid md:grid-cols-1 md:gap-6 lg:grid-cols-12">
         
         {/* Left Panel: Question Context */}
-        <div className="flex flex-col lg:col-span-4 min-h-0">
-          <div className="flex-grow rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative overflow-hidden">
+        <div className="flex flex-col min-h-0 lg:col-span-4 flex-[0_1_auto]">
+          <div className="flex-grow min-h-0 rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-transparent pointer-events-none" />
             
-            <div className="p-6 border-b border-white/[0.08] relative z-10 flex justify-between items-center bg-white/[0.01]">
-              <div className="flex items-center gap-3">
+            <div className="px-4 py-2.5 md:p-6 border-b border-white/[0.08] relative z-10 flex justify-between items-center bg-white/[0.01] shrink-0">
+              <div className="hidden md:flex items-center gap-3">
                 <div className="h-8 w-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
                   <BrainCircuit className="h-4 w-4 text-purple-400" />
                 </div>
                 <span className="text-sm font-semibold text-purple-300">AI Interviewer</span>
               </div>
+              <span className="md:hidden text-[11px] font-semibold uppercase tracking-wider text-purple-300/80">AI Interviewer</span>
               {(isVoice || isMixed) && ttsSupported && (
                 <button
                   onClick={() => setTtsEnabled((v) => !v)}
@@ -708,7 +740,7 @@ export default function InterviewEnginePage() {
               )}
             </div>
 
-            <div className="flex-grow p-6 overflow-y-auto relative z-10">
+            <div className="flex-grow min-h-0 overflow-y-auto p-4 md:p-6 relative z-10">
               {isThinking ? (
                 <div className="flex items-center gap-3 text-purple-400 animate-pulse">
                   <Activity className="h-5 w-5" />
@@ -716,7 +748,7 @@ export default function InterviewEnginePage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-semibold leading-relaxed text-white">
+                  <h2 className="text-lg sm:text-2xl font-semibold leading-relaxed text-white">
                     {currentQuestion?.question}
                   </h2>
                   {(isVoice || isMixed) && ttsSupported && (
@@ -735,18 +767,18 @@ export default function InterviewEnginePage() {
         </div>
 
         {/* Center Panel: Answer Area */}
-        <div className="flex flex-col lg:col-span-5 min-h-0">
-          <div className="flex-grow rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative">
+        <div className="flex flex-col min-h-0 lg:col-span-5 flex-[1_1_auto]">
+          <div className="flex-grow min-h-0 rounded-2xl border border-white/[0.08] bg-[#0D1424] shadow-lg flex flex-col relative">
             
             {/* Answer Control Body */}
             {interviewMode === "TEXT" && (
-              <div className="flex-grow flex flex-col p-6">
+              <div className="flex-grow min-h-0 flex flex-col p-4 md:p-6">
                 <textarea
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
                   placeholder="Type your answer here..."
                   disabled={isSubmitting}
-                  className="flex-grow w-full bg-transparent text-white resize-none focus:outline-none placeholder-slate-600 text-[15px] leading-relaxed"
+                  className="flex-grow min-h-0 w-full overflow-y-auto bg-transparent text-white resize-none focus:outline-none placeholder-slate-600 text-[15px] leading-relaxed"
                 />
               </div>
             )}
@@ -761,9 +793,9 @@ export default function InterviewEnginePage() {
             )}
 
             {isMixed && (
-              <div className="flex-grow flex flex-col">
+              <div className="flex-grow min-h-0 flex flex-col">
                 {/* Mode toggle buttons */}
-                <div className="flex gap-2 p-4 border-b border-white/[0.08]">
+                <div className="flex shrink-0 gap-2 p-4 border-b border-white/[0.08]">
                   <button
                     type="button"
                     onClick={() => setMixedInputMode("voice")}
@@ -802,13 +834,13 @@ export default function InterviewEnginePage() {
 
                 {/* Text input */}
                 {mixedInputMode === "text" && (
-                  <div className="flex-grow flex flex-col p-6">
+                  <div className="flex-grow min-h-0 flex flex-col p-4 md:p-6">
                     <textarea
                       value={answerText}
                       onChange={(e) => setAnswerText(e.target.value)}
                       placeholder="Type your answer here..."
                       disabled={isSubmitting}
-                      className="flex-grow w-full bg-transparent text-white resize-none focus:outline-none placeholder-slate-600 text-[15px] leading-relaxed"
+                      className="flex-grow min-h-0 w-full overflow-y-auto bg-transparent text-white resize-none focus:outline-none placeholder-slate-600 text-[15px] leading-relaxed"
                     />
                   </div>
                 )}
@@ -816,7 +848,7 @@ export default function InterviewEnginePage() {
             )}
 
             {/* Bottom Actions */}
-            <div className="p-4 border-t border-white/[0.08] bg-white/[0.02] flex items-center justify-between">
+            <div className="p-4 border-t border-white/[0.08] bg-white/[0.02] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => submitAnswer(true)}
@@ -839,7 +871,7 @@ export default function InterviewEnginePage() {
         </div>
 
         {/* Right Panel: Live Metrics */}
-        <div className="flex flex-col lg:col-span-3 min-h-0 gap-6">
+        <div className="hidden md:flex flex-col lg:col-span-3 min-h-0 gap-6">
           
           {/* Progress Card */}
           <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-5 shadow-lg">
@@ -897,6 +929,7 @@ export default function InterviewEnginePage() {
 
         </div>
       </main>
-    </div>
+      </div>
+    </ActiveWorkspace>
   );
 }

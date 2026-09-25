@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { StoreProvider } from "@/context/StoreContext";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { GlobalIntro } from "@/components/layout/GlobalIntro";
 
@@ -32,11 +31,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#050814] text-[#F8FAFC]" suppressHydrationWarning>
         <AuthProvider>
-          <StoreProvider>
-            <GlobalIntro>
-              {children}
-            </GlobalIntro>
-          </StoreProvider>
+          <GlobalIntro>
+            {children}
+          </GlobalIntro>
         </AuthProvider>
       </body>
     </html>

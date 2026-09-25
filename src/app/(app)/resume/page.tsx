@@ -163,6 +163,11 @@ export default function ResumePage() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Reset the input value so selecting the SAME file again (retry after a
+    // failed upload/parse, or replacing with an identical filename) still
+    // fires a change event. Without this, the browser sees an unchanged value
+    // and the second selection is silently ignored.
+    e.target.value = "";
     if (!file) return;
 
     setToast(null);

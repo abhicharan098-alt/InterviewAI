@@ -7,7 +7,7 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  const token = await getToken({ req: request, secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET });
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET });
   const isAuthPage = request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register";
 
   if (isAuthPage) {

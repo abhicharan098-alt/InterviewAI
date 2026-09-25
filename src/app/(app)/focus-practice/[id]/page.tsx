@@ -6,6 +6,7 @@ import { Mic, MicOff, Target, Loader2, ArrowRight, ArrowLeft } from "lucide-reac
 import Link from "next/link";
 import { Reveal } from "@/components/dashboard/Reveal";
 import { InterviewPauseModal } from "@/components/interviews/InterviewPauseModal";
+import { ActiveWorkspace } from "@/components/interviews/ActiveWorkspace";
 
 /* ─── Web Speech API types ─── */
 interface ISpeechRecognition extends EventTarget {
@@ -122,8 +123,8 @@ function VoicePanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col items-center gap-4 py-4">
+    <div className="flex min-h-0 flex-col gap-4">
+      <div className="flex shrink-0 flex-col items-center gap-4 py-4">
         <button
           onClick={toggleListening}
           disabled={isSubmitting}
@@ -141,7 +142,7 @@ function VoicePanel({
       </div>
 
       {(answerText || interim) && (
-        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-sm leading-relaxed text-white min-h-[80px]">
+        <div className="max-h-[25dvh] overflow-y-auto rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-sm leading-relaxed text-white min-h-[80px] md:max-h-none">
           {answerText}
           {interim && <span className="text-slate-400"> {interim}</span>}
         </div>
@@ -332,7 +333,8 @@ export default function FocusPracticeSessionPage() {
   const isVoiceMode = interview.mode === "VOICE" || interview.mode === "MIXED";
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <ActiveWorkspace desktopClassName="md:h-auto md:overflow-visible md:pt-0 md:pb-0">
+      <div className="mx-auto flex h-full w-full max-w-4xl flex-col px-4 py-3 md:h-auto md:block md:py-8">
       {showReminderModal && (
         <InterviewPauseModal
           interviewId={id as string}
@@ -410,43 +412,45 @@ export default function FocusPracticeSessionPage() {
             router.push("/focus-areas");
           }
         }}
-        className="inline-flex items-center text-sm text-slate-400 hover:text-white mb-6"
+        className="inline-flex shrink-0 items-center text-sm text-slate-400 hover:text-white mb-3 md:mb-6"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         {status === "IN_PROGRESS" && !isComplete ? "Pause / Exit Interview" : "Back to Focus Areas"}
       </button>
       
-      <Reveal>
-        <div className="mb-8 text-center">
+      <Reveal className="flex flex-1 min-h-0 flex-col md:block">
+        <div className="hidden mb-8 text-center md:block">
           <h1 className="text-3xl font-bold text-white mb-2">Focus Practice</h1>
           <p className="text-slate-400">Improve the skills you selected through targeted AI questions.</p>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-[#0D1424] p-6 md:p-8 shadow-2xl mb-6 relative overflow-hidden">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1424] p-4 shadow-2xl md:mb-6 md:block md:p-8">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-violet-500" />
           
-          <div className="flex justify-between items-center mb-6 text-sm font-medium">
-            <span className="text-purple-400 uppercase tracking-wider bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 mb-3 text-sm font-medium md:mb-6">
+            <span className="max-w-[60%] truncate text-purple-400 uppercase tracking-wider bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
               {currentQuestion.category}
             </span>
-            <div className="flex items-center gap-4 text-slate-400">
+            <div className="flex items-center gap-3 text-slate-400">
               {timeRemaining !== null && (
-                <span className={`font-mono ${timeRemaining < 60 ? 'text-red-400 animate-pulse' : ''}`}>
+                <span className={`font-mono tabular-nums ${timeRemaining < 60 ? 'text-red-400 animate-pulse' : ''}`}>
                   {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")}
                 </span>
               )}
-              <span>
+              <span className="whitespace-nowrap text-xs md:text-sm">
                 Question {currentQuestion.questionNumber} of {interview.questionCount}
               </span>
             </div>
           </div>
           
-          <h2 className="text-xl md:text-2xl font-semibold text-white leading-relaxed mb-8">
-            {currentQuestion.question}
-          </h2>
+          <div className="min-h-0 flex-[0_1_auto] overflow-y-auto md:overflow-visible">
+            <h2 className="text-lg md:text-2xl font-semibold text-white leading-relaxed mb-3 md:mb-8">
+              {currentQuestion.question}
+            </h2>
+          </div>
 
           {feedback ? (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto animate-in fade-in slide-in-from-bottom-4 md:flex-none md:overflow-visible">
               <div className="rounded-xl bg-white/5 border border-white/10 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-lg text-white">AI Feedback</h3>
@@ -483,24 +487,24 @@ export default function FocusPracticeSessionPage() {
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="flex min-h-0 flex-1 flex-col space-y-3 md:flex-none md:space-y-6">
               {isVoiceMode && (
                 <VoicePanel answerText={answerText} setAnswerText={setAnswerText} isSubmitting={isSubmitting} />
               )}
               
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 ml-1">
+              <div className="flex min-h-0 flex-1 flex-col space-y-2 md:flex-none">
+                <label className="shrink-0 text-xs font-semibold uppercase tracking-wider text-slate-500 ml-1">
                   {isVoiceMode ? "Or Type Your Answer" : "Your Answer"}
                 </label>
                 <textarea
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
                   placeholder="Type your answer here..."
-                  className="w-full min-h-[120px] rounded-xl border border-white/[0.1] bg-white/[0.03] p-4 text-white placeholder-slate-500 focus:border-purple-500/50 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                  className="w-full min-h-0 flex-1 resize-none overflow-y-auto rounded-xl border border-white/[0.1] bg-white/[0.03] p-4 text-white placeholder-slate-500 focus:border-purple-500/50 focus:outline-none focus:ring-1 focus:ring-purple-500/50 md:min-h-[120px] md:resize"
                 />
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex shrink-0 gap-4">
                 <button
                   onClick={handleSkip}
                   disabled={isSubmitting}
@@ -522,7 +526,7 @@ export default function FocusPracticeSessionPage() {
       </Reveal>
       
       {!isComplete && (
-        <div className="mt-4 flex justify-center pb-8">
+        <div className="mt-3 flex shrink-0 justify-center pb-4 md:mt-4 md:pb-8">
           <button
             onClick={() => setShowEndFocusModal(true)}
             className="rounded-full border border-white/5 bg-black/20 px-6 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/50"
@@ -531,6 +535,7 @@ export default function FocusPracticeSessionPage() {
           </button>
         </div>
       )}
-    </div>
+      </div>
+    </ActiveWorkspace>
   );
 }

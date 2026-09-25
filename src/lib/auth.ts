@@ -77,9 +77,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  // Host trust is handled by NextAuth v4 via the AUTH_TRUST_HOST env var
-  // (allows the app to sit behind Cloudflare/ngrok tunnels).
-  useSecureCookies: process.env.NEXTAUTH_URL?.startsWith("https") ?? false,
   callbacks: {
     /**
      * Runs before a sign-in is accepted.
@@ -236,6 +233,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     }
   },
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
 };
 

@@ -1,9 +1,10 @@
 // MUST be imported before pdfjs-dist: pdfjs's legacy build (pdf.mjs) executes
 // `const SCALE_MATRIX = new DOMMatrix();` at module instantiation, and on the
 // Node serverless runtime DOMMatrix only exists if this polyfill installs it
-// (pdf.js's own polyfill requires the optional native dep @napi-rs/canvas,
-// which is not present in the Vercel bundle — without this import every
-// extraction crashes with `ReferenceError: DOMMatrix is not defined`).
+// (pdf.js's own polyfill lives in the @napi-rs/canvas native addon, which is
+// preloaded separately in pdf-polyfills but never relied upon — without this
+// import every extraction crashes with `ReferenceError: DOMMatrix is not
+// defined`).
 import "./pdf-polyfills";
 
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";

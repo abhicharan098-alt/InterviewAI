@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // pdfjs-dist probes for @napi-rs/canvas at runtime via createRequire; keep it
+  // as an external (never bundled) native module on the serverless runtime.
+  serverExternalPackages: ["@napi-rs/canvas"],
   // Allow Cloudflare tunnel (and similar) to access dev resources
   allowedDevOrigins: [
     "purchase-accuracy-schools-yet.trycloudflare.com",
@@ -27,19 +30,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cdn.shopify.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cabelochave.com',
         port: '',
         pathname: '/**',
       },

@@ -25,6 +25,25 @@
  * is unchanged.
  */
 
+/**
+ * Preload the optional native canvas addon (`@napi-rs/canvas`) BEFORE
+ * pdfjs-dist is imported. pdf.mjs's `node_utils` module probes for it at
+ * module instantiation via `require("@napi-rs/canvas")` and, when the
+ * resolution fails (as it does in the Vercel serverless bundle, where the
+ * package is not traced because it is only reachable through that runtime
+ * `createRequire`), logs `Warning: Cannot load "@napi-rs/canvas" package.`
+ * Loading it here first makes the bundler include it in the serverless bundle
+ * and satisfies the later `require` from the module cache, so the warning
+ * never fires. Text extraction never touches canvas; our DOMMatrix/Path2D
+ * polyfills below remain the active globals. Guarded so a missing platform
+ * binary can never break parsing.
+ */
+try {
+  await import("@napi-rs/canvas");
+} catch {
+  // optional native addon - not required for text extraction
+}
+
 class PDFDOMMatrix {
   a: number;
   b: number;
@@ -375,3 +394,5 @@ class PDFPath2D {
 if (typeof globalThis.Path2D === "undefined") {
   globalThis.Path2D = PDFPath2D as unknown as typeof Path2D;
 }
+
+export {};
